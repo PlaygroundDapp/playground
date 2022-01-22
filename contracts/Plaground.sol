@@ -10,20 +10,50 @@ contract Playground is ERC721, Ownable {
     using Strings for uint256;
 
     Counters.Counter public _tokenIds;
-    mapping(uint => uint) shares; // tokenId => share amount
-    uint totalShares;
+    mapping(uint256 => uint256) shares; // tokenId => share amount
+    mapping(uint256 => uint256) amountsClaimed; //token id => amounts claimed
+    uint256 totalShares = 100;
+    uint256 currentlyIssuedShares;
+    uint256 totalDepositAmount;
 
-    constructor() ERC721('Playground', 'PG') {}
+    constructor() ERC721("Playground", "PG") {}
 
-    function mint(uint _share, address _to) public onlyOwner returns(uint256){
-        require(totalShares + _share <= 100);
-        uint tokenId = _tokenIds.current();
+    function mint(address _to, uint256 _share)
+        public
+        onlyOwner
+        returns (uint256)
+    {
+        require(currentlyIssuedShares + _share <= totalShares);
+        uint256 tokenId = _tokenIds.current();
         _safeMint(_to, tokenId);
         shares[tokenId] = _share;
         _tokenIds.increment();
-        totalShares += _share;
+        currentlyIssuedShares += _share;
         return tokenId;
     }
 
-    
+    modifier positiveAmount(uint256 _amount) {
+        if (_amount == 0) {
+            revert("Amount should be bigger than 0");
+        }
+        _;
+    }
+
+    function deposit(uint256 _amount) external payable positiveAmount(_amount) {
+        totalDepositAmount += _amount;
+    }
+
+    function claim(uint256 _tokenId) external {
+        uint256 amountDeserved = (totalDepositAmount * shares[_tokenId]) /
+            totalShares;
+        uint256 amountToSend = amountDeserved - amountsClaimed[_tokenId];
+
+        require(amountToSend > 0, "You dont deserve shit.");
+
+        (bool success, ) = msg.sender.call{value: amountToSend}("Be rich");
+        if (!success) {
+            revert("Claim failed");
+        }
+        amountsClaimed[_tokenId] += amountToSend;
+    }
 }
