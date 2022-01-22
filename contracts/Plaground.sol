@@ -1,43 +1,29 @@
 //SPDX-License-Identifier: Unlicense
-pragma solidity ^0.8.4;
+pragma solidity ^0.8.0;
 
-import "@openzeppelin/contracts/token/ERC1155/ERC1155.sol";
+import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
-contract Playground is ERC1155 {
+contract Playground is ERC721, Ownable {
     using Counters for Counters.Counter;
+    using Strings for uint256;
+
     Counters.Counter public _tokenIds;
-    struct Project {
-        address owner;
-        string name;
+    mapping(uint => uint) shares; // tokenId => share amount
+    uint totalShares;
+
+    constructor() ERC721('Playground', 'PG') {}
+
+    function mint(uint _share, address _to) public onlyOwner returns(uint256){
+        require(totalShares + _share <= 100);
+        uint tokenId = _tokenIds.current();
+        _safeMint(_to, tokenId);
+        shares[tokenId] = _share;
+        _tokenIds.increment();
+        totalShares += _share;
+        return tokenId;
     }
 
-    mapping (uint => Project ) projects;
-
-    mapping (uint256 => mapping(address => uint256)) internal claims;
-    mapping (uint256 => uint256) internal projectToRevenue;
-
-    constructor() ERC1155("invalid url") {}
-
-
-    function createProject(string memory _name) public returns (uint) {
-      uint currentId = _tokenIds.current();
-      projects[currentId] = Project(msg.sender, _name);
-      _tokenIds.increment();
-      return currentId;
-    }
     
-    
-    function claim(uint _tokenId) external {
-        uint256 share = balanceOf(msg.sender, _tokenId);
-        uint256 revenue = projectToRevenue[_tokenId];
-        uint256 amountClaimed = claims[_tokenId][msg.sender];
-        uint256 revenueToClaim = (revenue * (share / 100)) - amountClaimed;
-        
-        (bool success, ) = msg.sender.call{value: revenueToClaim}("");
-        require(success, "Transaction failed");
-
-        claims[_tokenId][msg.sender] = claims[_tokenId][msg.sender] + revenueToClaim;
-    }
 }

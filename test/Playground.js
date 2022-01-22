@@ -15,7 +15,7 @@ describe("Playground Contract", () => {
     const projectId = playground.createProject();
   });
 
-  describe("createProject", function () {
+  describe("mint", function () {
     it("createProject to return project id", async () => {
       
     });
