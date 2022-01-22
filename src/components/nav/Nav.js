@@ -1,13 +1,21 @@
 import React from "react";
+import {Link} from "react-router-dom"
+import { checkIfWalletIsConnected, connectWallet } from "../../utils/common"
 
 export default function NavBar(){
     const hash = global.window && window.location.hash;
     const routes = [
         {
-            name: "mint",
+            name: "Mint",
             route: "/"
         }
     ]
+    const handleConnectWallet = (account) => {
+        // console.log({ account }) 
+
+    }
+
+
     return (
         <div>
             <header
@@ -16,7 +24,7 @@ export default function NavBar(){
         >
             <div className="px-4 sm:px-6 lg:px-8 flex items-center justify-between h-16">
                 <div className="text-xl font-bold uppercase">
-                    <span className="text-primary">Playground </span>
+                    <span className="text-primary">Playground Contract </span>
                     
                 </div>
                 <div className="flex items-center space-x-6">
@@ -28,11 +36,16 @@ export default function NavBar(){
                                 "border-b-2 border-primary text-primary"
                             } py-2 hover:text-primary`}
                         >
-                            {/* <Link href={route.route}>
-                                <a className=""> {route.name} </a>
-                            </Link> */}
+                            <Link to={route.route}>
+                            {route.name} 
+                                {/* <a className=""> {route.name} </a> */}
+                            </Link>
                         </div>
                     ))}
+                   
+                </div>
+                <div className="btn-primary btn">
+                <button onClick={() => checkIfWalletIsConnected(handleConnectWallet)}> Connect your wallet</button>
                 </div>
             </div>
         </header>

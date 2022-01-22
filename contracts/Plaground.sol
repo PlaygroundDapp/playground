@@ -1,20 +1,20 @@
 //SPDX-License-Identifier: Unlicense
 pragma solidity ^0.8.0;
 
-import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
+import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
-contract Playground is ERC721, Ownable {
+contract Playground is ERC721Enumerable, Ownable {
     using Counters for Counters.Counter;
     using Strings for uint256;
 
     Counters.Counter public _tokenIds;
-    mapping(uint256 => uint256) shares; // tokenId => share amount
+    mapping(uint256 => uint256) public shares; // tokenId => share amount
     mapping(uint256 => uint256) amountsClaimed; //token id => amounts claimed
-    uint256 totalShares = 100;
+    uint256 public totalShares = 100;
     uint256 currentlyIssuedShares;
-    uint256 totalDepositAmount;
+    uint256 totalDepositedAmount;
 
     constructor() ERC721("Playground", "PG") {}
 
@@ -40,11 +40,15 @@ contract Playground is ERC721, Ownable {
     }
 
     function deposit(uint256 _amount) external payable positiveAmount(_amount) {
-        totalDepositAmount += _amount;
+        totalDepositedAmount += _amount;
     }
 
     function claim(uint256 _tokenId) external {
-        uint256 amountDeserved = (totalDepositAmount * shares[_tokenId]) /
+        require(
+            ownerOf(_tokenId) == msg.sender,
+            "You are not the owner of this token."
+        );
+        uint256 amountDeserved = (totalDepositedAmount * shares[_tokenId]) /
             totalShares;
         uint256 amountToSend = amountDeserved - amountsClaimed[_tokenId];
 

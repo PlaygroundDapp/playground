@@ -1,5 +1,7 @@
 const { expect } = require("chai");
 const { ethers } = require("hardhat");
+const { BigNumber } = require("ethers");
+
 
 describe("Playground Contract", () => {
   let playground;
@@ -42,7 +44,7 @@ describe("Playground Contract", () => {
   };
 
   describe("mint", function () {
-    it("can mint", async () => {
+    it("can mint NFTs", async () => {
       await niceMint();
 
       for(const shareholder of shareholders) {
@@ -50,6 +52,37 @@ describe("Playground Contract", () => {
           await playground.balanceOf(shareholder.address)
         ).to.equal(1);
       }
+
+      const totalSupply = await playground.totalSupply();
+
+      expect(
+        totalSupply
+      ).to.equal(shareholders.length);
+
+      let totalShares = 0;
+
+      for(let i = 0; i < totalSupply; i++) { 
+
+        const tokenId = await playground.tokenByIndex(i);
+
+        expect(
+          await playground.tokenOfOwnerByIndex(shareholders[i].address, 0)
+        ).to.equal(tokenId);
+
+        await expect(
+          playground.tokenOfOwnerByIndex(shareholders[i].address, 1)
+        ).to.be.revertedWith("ERC721Enumerable: owner index out of bounds");
+
+        expect(
+          await playground.ownerOf(tokenId)
+        ).to.equal(shareholders[i].address);
+
+        totalShares += (await playground.shares(tokenId)).toNumber();
+      }
+
+      expect(
+        totalShares
+      ).to.equal(await playground.totalShares());
     });
   });
 });
