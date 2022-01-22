@@ -8,32 +8,36 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 contract Playground is ERC1155 {
     using Counters for Counters.Counter;
     Counters.Counter public _tokenIds;
-
-    struct Shareholder {
-        uint amountClaimed;
+    struct Project {
+        address owner;
+        string name;
     }
 
-    mapping (uint => Shareholder) public shareholderToOwnership;
-    mapping (uint => uint) public projectToRevenue;
+    mapping (uint => Project ) projects;
+
+    mapping (uint256 => mapping(address => uint256)) internal claims;
+    mapping (uint256 => uint256) internal projectToRevenue;
 
     constructor() ERC1155("invalid url") {}
 
 
-    function createProject() public returns (uint) {
+    function createProject(string memory _name) public returns (uint) {
       uint currentId = _tokenIds.current();
+      projects[currentId] = Project(msg.sender, _name);
       _tokenIds.increment();
       return currentId;
     }
     
-    function claim(uint tokenId) external {
-        uint share = balanceOf(msg.sender, tokenId);
-        uint revenue = projectToRevenue[tokenId];
-
-        uint revenueToClaim = (revenue * (share / 100)) - shareholder.amountClaimed;
+    
+    function claim(uint _tokenId) external {
+        uint256 share = balanceOf(msg.sender, _tokenId);
+        uint256 revenue = projectToRevenue[_tokenId];
+        uint256 amountClaimed = claims[_tokenId][msg.sender];
+        uint256 revenueToClaim = (revenue * (share / 100)) - amountClaimed;
         
-        (bool success, ) = msg.sender.call{value: share}("");
+        (bool success, ) = msg.sender.call{value: revenueToClaim}("");
         require(success, "Transaction failed");
 
-        shareholder.amountClaimed += share;
+        claims[_tokenId][msg.sender] = claims[_tokenId][msg.sender] + revenueToClaim;
     }
 }
