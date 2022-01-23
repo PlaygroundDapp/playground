@@ -1,4 +1,5 @@
 import { ethers } from 'ethers';
+import abi from "../abis/Playground.json";
 
 export const getSignedContract = (address, contractABI) => {
     const { ethereum } = window;
@@ -65,13 +66,21 @@ export const connectWallet = async (setCurrentAccount) => {
     }
 }
 
-export const mint = async (contract, shareholderAddress, shareAmount) => {
+export const mint = async (address, shareholderAddress, shareAmount) => {
     try {
-        if (!contract) {
+        if (!address) {
             return;
         }
+        const { ethereum } = window;
+
+        if (!ethereum) return
+    
+        const provider = new ethers.providers.Web3Provider(ethereum);
+        const signer = provider.getSigner();
+        const contract = new ethers.Contract(address, abi.abi, signer);
 
         const txn = await contract.mint(shareholderAddress, shareAmount);
+        console.log({ txn });
         await txn.wait();
     } catch (error) {
         console.log(error);

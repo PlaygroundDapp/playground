@@ -1,19 +1,29 @@
 import React from "react";
 import {Link} from "react-router-dom"
-import { checkIfWalletIsConnected, connectWallet } from "../../utils/common"
+// import { checkIfWalletIsConnected, connectWallet } from "../../utils/common"
 
 export default function NavBar(){
     const hash = global.window && window.location.hash;
+    // const [metaAccount, setMetaAccount] = React.useState(null);
     const routes = [
         {
             name: "Mint",
             route: "/"
         }
     ]
-    const handleConnectWallet = (account) => {
-        // console.log({ account }) 
+    // const handleConnectWallet = (account) => {
+    //     console.log({ account })
+    //     if (account) setMetaAccount(account)
 
-    }
+    // }
+
+    // React.useEffect(() => {
+    //     const initialise = async () => {
+    //        await checkIfWalletIsConnected(handleConnectWallet)
+    //     }
+    //     initialise();
+         
+    // },[])
 
 
     return (
@@ -44,9 +54,12 @@ export default function NavBar(){
                     ))}
                    
                 </div>
-                <div className="btn-primary btn">
-                <button onClick={() => checkIfWalletIsConnected(handleConnectWallet)}> Connect your wallet</button>
-                </div>
+                {/* <div >
+                    {metaAccount ? <>
+                    <div>Connected</div>
+                    </>: <button className="btn-primary btn" onClick={() => checkIfWalletIsConnected(handleConnectWallet)}> Connect your wallet</button> }
+                
+                </div> */}
             </div>
         </header>
         </div>
