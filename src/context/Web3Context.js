@@ -22,7 +22,7 @@ export function Web3ContextProvider({ children }) {
     const accounts = await ethereum.request({ method: "eth_accounts" });
     if (accounts.length) {
       setAccount(accounts[0]);
-      setProvider(new ethers.providers.Web3Provider(ethereum).getSigner());
+      setProvider(new ethers.providers.Web3Provider(ethereum));
       setIsActive(true);
     }
   }
