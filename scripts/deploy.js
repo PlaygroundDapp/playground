@@ -3,13 +3,13 @@ const hre = require("hardhat");
 async function main() {
     const [deployer] = await hre.ethers.getSigners();
 
-    const SampleContract = await hre.ethers.getContractFactory("Playground");
-    const sampleContract = await SampleContract.deploy();
+    const PlaygroundContract = await hre.ethers.getContractFactory("Playground");
+    const playgroundContract = await SampleContract.deploy();
 
-    await sampleContract.deployed();
-    console.log("Sample Contract address:", sampleContract.address);
+    await playgroundContract.deployed();
+    console.log("Sample Contract address:", playgroundContract.address);
 
-    saveFrontendFiles(sampleContract);
+    saveFrontendFiles(playgroundContract);
 
 }
 
