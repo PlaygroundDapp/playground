@@ -2,49 +2,55 @@ const { expect } = require("chai");
 const { ethers } = require("hardhat");
 
 
-describe("Playground Contract", () => {
+describe("Playground Contract", async function () {
   let playground;
-  let owner;
-  let shareholders = [];
+  const signers = await ethers.getSigners();  
+  const owner = signers[0];
+  const shareholders = [
+    {
+      address: signers[1].address,
+      share: 50,
+      signer: signers[1]
+    },
+    {
+      address: signers[2].address,
+      share: 20,
+      signer: signers[2]
+    },
+    {
+      address: signers[3].address,
+      share: 10,
+      signer: signers[3]
+    },
+    {
+      address: signers[4].address,
+      share: 10,
+      signer: signers[4]
+    },
+    {
+      address: signers[5].address,
+      share: 10,
+      signer: signers[5]
+    }
+  ];
 
   beforeEach(async () => {
     const Playground = await ethers.getContractFactory("Playground");
     playground = await Playground.deploy();
     await playground.deployed();
-
-    const signers = await ethers.getSigners();
-    owner = signers[0];
-    shareholders.push({
-      address: signers[1].address,
-      share: 50,
-      signer: signers[1]
-    });
-    shareholders.push({
-      address: signers[2].address,
-      share: 20,
-      signer: signers[2]
-    });
-    shareholders.push({
-      address: signers[3].address,
-      share: 10,
-      signer: signers[3]
-    });
-    shareholders.push({
-      address: signers[4].address,
-      share: 10,
-      signer: signers[4]
-    });
-    shareholders.push({
-      address: signers[5].address,
-      share: 10,
-      signer: signers[5]
-    });
   });
 
   const niceMint = async function() {
     for(const shareholder of shareholders) {
       await playground.connect(owner).mint(shareholder.address, shareholder.share);
     }
+  };
+
+  const niceDeposit = async function(amount) {
+    await playground.connect(shareholders[0].signer).
+    setApprovalForAll(playground.address, true);
+    await playground.connect(shareholders[0].signer)
+    .deposit({ value: amount });
   };
 
   const getSnapshot = async function() {
@@ -63,7 +69,7 @@ describe("Playground Contract", () => {
   }
 
   describe("mint", function () {
-    it("can mint NFTs", async () => {
+    it("can mint NFTs", async function () {
       await niceMint();
 
       for(const shareholder of shareholders) {
@@ -95,7 +101,7 @@ describe("Playground Contract", () => {
       ).to.equal(await playground.totalShares());
     });
 
-    it("cannot mint with 0 share", async () => {
+    it("cannot mint with 0 share", async function () {
       await expect(
         playground.connect(owner).mint(shareholders[0].address, 0)
       ).to.be.revertedWith(
@@ -105,17 +111,14 @@ describe("Playground Contract", () => {
   });
 
   describe("deposit", function () {
-    it("can deposit ether", async () => {
+    it("can deposit ether", async function () {
       const oneETH = ethers.utils.parseEther("1");
       const shareHolderETHBefore = await ethers.provider.getBalance(shareholders[0].address);
       expect(
         await ethers.provider.getBalance(playground.address)
       ).to.equal(0);
 
-      await playground.connect(shareholders[0].signer).
-      setApprovalForAll(playground.address, true);
-      await playground.connect(shareholders[0].signer)
-      .deposit({ value: oneETH });
+      await niceDeposit(oneETH);
 
       expect(
         await ethers.provider.getBalance(playground.address)
@@ -127,5 +130,37 @@ describe("Playground Contract", () => {
         await playground.totalDepositedAmount()
       ).to.equal(oneETH);
     });
+  });
+
+  describe("claim", function () {
+    it("can claim deposited share", async function() {
+      await niceMint();
+      await niceDeposit(ethers.utils.parseEther("100"));
+
+      const snapshot = await getSnapshot();
+      const tokens = snapshot[shareholders[0].address];
+
+      expect(tokens.length).to.equal(1);
+
+      const shareHolderETHBefore = await ethers.provider.getBalance(shareholders[0].address);
+      const contractETHBefore = await ethers.provider.getBalance(playground.address);
+
+      expect(contractETHBefore).to.equal(ethers.utils.parseEther("100"));
+
+      await playground.connect(shareholders[0].signer).claim(tokens[0].tokenId);
+
+      expect(
+        await ethers.provider.getBalance(shareholders[0].address)
+      ).to.be.above(
+        shareHolderETHBefore.add(ethers.utils.parseEther("49"))
+      );
+      expect(
+        await ethers.provider.getBalance(playground.address)
+      ).to.equal(ethers.utils.parseEther("50"));
+
+      await expect(
+        playground.connect(shareholders[0].signer).claim(tokens[0].tokenId)
+      ).to.be.revertedWith("You dont deserve shit.");
+    })
   });
 });

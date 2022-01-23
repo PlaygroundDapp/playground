@@ -4,6 +4,7 @@ pragma solidity ^0.8.0;
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
+import "hardhat/console.sol";
 
 contract Playground is ERC721Enumerable, Ownable {
     using Counters for Counters.Counter;
@@ -13,7 +14,7 @@ contract Playground is ERC721Enumerable, Ownable {
     mapping(uint256 => uint256) public shares; // tokenId => share amount
     mapping(uint256 => uint256) amountsClaimed; //tokenId => amounts claimed
     uint256 public totalShares = 100;
-    uint256 currentlyIssuedShares;
+    uint256 public currentlyIssuedShares;
     uint256 public totalDepositedAmount;
 
     constructor() ERC721("Playground", "PG") {}
