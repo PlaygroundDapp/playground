@@ -23,6 +23,14 @@
      }
    }
  }
+
+//  if (NETWORK == LOCAL_NETWORK) {
+//   networks = {
+//     hardhat: {
+//       chainId: 31337
+//     },
+//  }
+// }
  
  module.exports = {
    solidity: "0.8.0",
