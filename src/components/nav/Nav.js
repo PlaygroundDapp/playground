@@ -8,6 +8,9 @@ export default function NavBar(){
         {
             name: "Mint",
             route: "/"
+        }, {
+            name: "Claim",
+            route: "/claim"
         }
     ]
     const handleConnectWallet = (account) => {
