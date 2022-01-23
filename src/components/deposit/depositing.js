@@ -32,7 +32,7 @@ export default function Depositing() {
     const amount = ethers.utils.parseEther(amountString);
     console.log("amount in wei: ", amount);
 
-    const response = await contract.deposit(amount, { value: amount });
+    const response = await contract.deposit({ value: amount });
     console.log(response);
   }
 
