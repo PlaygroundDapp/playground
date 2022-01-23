@@ -1,6 +1,5 @@
 const { expect } = require("chai");
 const { ethers } = require("hardhat");
-const { BigNumber } = require("ethers");
 
 
 describe("Playground Contract", () => {
@@ -43,6 +42,21 @@ describe("Playground Contract", () => {
     }
   };
 
+  const getSnapshot = async function() {
+    const tokenIdsByAddress = new Map(); // owner address => [{tokenId, share}]
+    for(let i = 0; i < await playground.totalSupply(); i++) {
+      const tokenId = await playground.tokenByIndex(i);
+      const address = await playground.ownerOf(tokenId);
+      const share = await playground.shares(tokenId);
+
+      if(!tokenIdsByAddress[address]) {
+        tokenIdsByAddress[address] = [];
+      }
+      tokenIdsByAddress[address].push({ tokenId, share });
+    }
+    return tokenIdsByAddress;
+  }
+
   describe("mint", function () {
     it("can mint NFTs", async () => {
       await niceMint();
@@ -54,30 +68,21 @@ describe("Playground Contract", () => {
       }
 
       const totalSupply = await playground.totalSupply();
+      expect(totalSupply).to.equal(shareholders.length);
 
-      expect(
-        totalSupply
-      ).to.equal(shareholders.length);
-
+      const snapshot = await getSnapshot();
       let totalShares = 0;
 
-      for(let i = 0; i < totalSupply; i++) { 
+      for(let i = 0; i < shareholders.length; i++) { 
+        const address = shareholders[i].address;
+        const tokens = snapshot[address];
 
-        const tokenId = await playground.tokenByIndex(i);
+        expect(tokens).to.be.an('array');
+        expect(tokens.length).to.equal(1);
 
-        expect(
-          await playground.tokenOfOwnerByIndex(shareholders[i].address, 0)
-        ).to.equal(tokenId);
-
-        await expect(
-          playground.tokenOfOwnerByIndex(shareholders[i].address, 1)
-        ).to.be.revertedWith("ERC721Enumerable: owner index out of bounds");
-
-        expect(
-          await playground.ownerOf(tokenId)
-        ).to.equal(shareholders[i].address);
-
-        totalShares += (await playground.shares(tokenId)).toNumber();
+        for(const token of tokens) {
+          totalShares += parseInt(token.share);
+        }
       }
 
       expect(
