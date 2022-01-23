@@ -82,6 +82,11 @@ describe("Playground Contract", async function () {
       const snapshot = await getSnapshot();
       let totalShares = 0;
 
+      expect(
+        await playground).to.emit(playground, "Mint").catch(function () {
+          console.log("Promise Rejected");
+        });
+
       for(let i = 0; i < shareholders.length; i++) { 
         const address = shareholders[i].address;
         const tokens = snapshot[address];
@@ -127,6 +132,10 @@ describe("Playground Contract", async function () {
       expect(
         await playground.totalDepositedAmount()
       ).to.equal(oneETH);
+      expect(
+        await playground).to.emit(playground, "Deposit").withArgs(oneETH).catch(function () {
+          console.log("Promise Rejected");
+        });
     });
   });
 
@@ -149,7 +158,9 @@ describe("Playground Contract", async function () {
 
       expect(contractETHBefore).to.equal(ethers.utils.parseEther("100"));
 
-      await playground.connect(shareholder1.signer).claim(shareholder1Token.tokenId);
+      await expect(
+        playground.connect(shareholder1.signer).claim(shareholder1Token.tokenId)
+      ).to.emit(playground, "Claim");
 
       expect(
         await ethers.provider.getBalance(shareholder1.address)
