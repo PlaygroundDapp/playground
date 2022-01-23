@@ -4,10 +4,10 @@ async function main() {
     const [deployer] = await hre.ethers.getSigners();
 
     const PlaygroundContract = await hre.ethers.getContractFactory("Playground");
-    const playgroundContract = await SampleContract.deploy();
+    const playgroundContract = await PlaygroundContract.deploy();
 
     await playgroundContract.deployed();
-    console.log("Sample Contract address:", playgroundContract.address);
+    console.log("Playground Contract address:", playgroundContract.address);
 
     saveFrontendFiles(playgroundContract);
 
@@ -23,14 +23,14 @@ function saveFrontendFiles(contract) {
 
     fs.writeFileSync(
         contractsDir + "/contract-address.json",
-        JSON.stringify({ SampleContract: contract.address }, undefined, 2)
+        JSON.stringify({ PlaygroundContract: contract.address }, undefined, 2)
     );
 
-    const SampleContractArtifact = artifacts.readArtifactSync("Playground");
+    const PlaygroundContractArtifact = artifacts.readArtifactSync("Playground");
 
     fs.writeFileSync(
         contractsDir + "/Playground.json",
-        JSON.stringify(SampleContractArtifact, null, 2)
+        JSON.stringify(PlaygroundContractArtifact, null, 2)
     );
 }
 
