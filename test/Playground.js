@@ -1,40 +1,43 @@
 const { expect } = require("chai");
 const { ethers } = require("hardhat");
-const { BigNumber } = require("ethers");
 
 
-describe("Playground Contract", () => {
+describe("Playground Contract", async function () {
   let playground;
-  let owner;
-  let shareholders = [];
+  const signers = await ethers.getSigners();  
+  const owner = signers[0];
+  const shareholders = [
+    {
+      address: signers[1].address,
+      share: 50,
+      signer: signers[1]
+    },
+    {
+      address: signers[2].address,
+      share: 20,
+      signer: signers[2]
+    },
+    {
+      address: signers[3].address,
+      share: 10,
+      signer: signers[3]
+    },
+    {
+      address: signers[4].address,
+      share: 10,
+      signer: signers[4]
+    },
+    {
+      address: signers[5].address,
+      share: 10,
+      signer: signers[5]
+    }
+  ];
 
   beforeEach(async () => {
     const Playground = await ethers.getContractFactory("Playground");
     playground = await Playground.deploy();
     await playground.deployed();
-
-    const signers = await ethers.getSigners();
-    owner = signers[0];
-    shareholders.push({
-      address: signers[1].address,
-      share: 50
-    });
-    shareholders.push({
-      address: signers[2].address,
-      share: 20
-    });
-    shareholders.push({
-      address: signers[3].address,
-      share: 10
-    });
-    shareholders.push({
-      address: signers[4].address,
-      share: 10
-    });
-    shareholders.push({
-      address: signers[5].address,
-      share: 10
-    });
   });
 
   const niceMint = async function() {
@@ -43,8 +46,30 @@ describe("Playground Contract", () => {
     }
   };
 
+  const niceDeposit = async function(amount) {
+    await playground.connect(shareholders[0].signer).
+    setApprovalForAll(playground.address, true);
+    await playground.connect(shareholders[0].signer)
+    .deposit({ value: amount });
+  };
+
+  const getSnapshot = async function() {
+    const tokenIdsByAddress = new Map(); // owner address => [{tokenId, share}]
+    for(let i = 0; i < await playground.totalSupply(); i++) {
+      const tokenId = await playground.tokenByIndex(i);
+      const address = await playground.ownerOf(tokenId);
+      const share = await playground.shares(tokenId);
+
+      if(!tokenIdsByAddress[address]) {
+        tokenIdsByAddress[address] = [];
+      }
+      tokenIdsByAddress[address].push({ tokenId, share });
+    }
+    return tokenIdsByAddress;
+  }
+
   describe("mint", function () {
-    it("can mint NFTs", async () => {
+    it("can mint NFTs", async function () {
       await niceMint();
 
       for(const shareholder of shareholders) {
@@ -54,35 +79,88 @@ describe("Playground Contract", () => {
       }
 
       const totalSupply = await playground.totalSupply();
+      expect(totalSupply).to.equal(shareholders.length);
 
-      expect(
-        totalSupply
-      ).to.equal(shareholders.length);
-
+      const snapshot = await getSnapshot();
       let totalShares = 0;
 
-      for(let i = 0; i < totalSupply; i++) { 
+      for(let i = 0; i < shareholders.length; i++) { 
+        const address = shareholders[i].address;
+        const tokens = snapshot[address];
 
-        const tokenId = await playground.tokenByIndex(i);
+        expect(tokens).to.be.an('array');
+        expect(tokens.length).to.equal(1);
 
-        expect(
-          await playground.tokenOfOwnerByIndex(shareholders[i].address, 0)
-        ).to.equal(tokenId);
-
-        await expect(
-          playground.tokenOfOwnerByIndex(shareholders[i].address, 1)
-        ).to.be.revertedWith("ERC721Enumerable: owner index out of bounds");
-
-        expect(
-          await playground.ownerOf(tokenId)
-        ).to.equal(shareholders[i].address);
-
-        totalShares += (await playground.shares(tokenId)).toNumber();
+        for(const token of tokens) {
+          totalShares += parseInt(token.share);
+        }
       }
 
       expect(
         totalShares
       ).to.equal(await playground.totalShares());
     });
+
+    it("cannot mint with 0 share", async function () {
+      await expect(
+        playground.connect(owner).mint(shareholders[0].address, 0)
+      ).to.be.revertedWith(
+        "Amount should be bigger than 0"
+      );
+    });
+  });
+
+  describe("deposit", function () {
+    it("can deposit ether", async function () {
+      const oneETH = ethers.utils.parseEther("1");
+      const shareHolderETHBefore = await ethers.provider.getBalance(shareholders[0].address);
+      expect(
+        await ethers.provider.getBalance(playground.address)
+      ).to.equal(0);
+
+      await niceDeposit(oneETH);
+
+      expect(
+        await ethers.provider.getBalance(playground.address)
+      ).to.equal(oneETH);
+      expect(
+        await ethers.provider.getBalance(shareholders[0].address)
+      ).to.be.at.most(shareHolderETHBefore.sub(oneETH));
+      expect(
+        await playground.totalDepositedAmount()
+      ).to.equal(oneETH);
+    });
+  });
+
+  describe("claim", function () {
+    it("can claim deposited share", async function() {
+      await niceMint();
+      await niceDeposit(ethers.utils.parseEther("100"));
+
+      const snapshot = await getSnapshot();
+      const tokens = snapshot[shareholders[0].address];
+
+      expect(tokens.length).to.equal(1);
+
+      const shareHolderETHBefore = await ethers.provider.getBalance(shareholders[0].address);
+      const contractETHBefore = await ethers.provider.getBalance(playground.address);
+
+      expect(contractETHBefore).to.equal(ethers.utils.parseEther("100"));
+
+      await playground.connect(shareholders[0].signer).claim(tokens[0].tokenId);
+
+      expect(
+        await ethers.provider.getBalance(shareholders[0].address)
+      ).to.be.above(
+        shareHolderETHBefore.add(ethers.utils.parseEther("49"))
+      );
+      expect(
+        await ethers.provider.getBalance(playground.address)
+      ).to.equal(ethers.utils.parseEther("50"));
+
+      await expect(
+        playground.connect(shareholders[0].signer).claim(tokens[0].tokenId)
+      ).to.be.revertedWith("You dont deserve shit.");
+    })
   });
 });

@@ -4,6 +4,7 @@ pragma solidity ^0.8.0;
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
+import "hardhat/console.sol";
 
 contract Playground is ERC721Enumerable, Ownable {
     using Counters for Counters.Counter;
@@ -11,7 +12,7 @@ contract Playground is ERC721Enumerable, Ownable {
 
     Counters.Counter public _tokenIds;
     mapping(uint256 => uint256) public shares; // tokenId => share amount
-    mapping(uint256 => uint256) amountsClaimed; //token id => amounts claimed
+    mapping(uint256 => uint256) amountsClaimed; //tokenId => amounts claimed
     uint256 public totalShares = 100;
     uint256 currentlyIssuedShares;
     uint256 public totalDepositedAmount;
@@ -21,6 +22,7 @@ contract Playground is ERC721Enumerable, Ownable {
     function mint(address _to, uint256 _share)
         public
         onlyOwner
+        positiveAmount(_share)
         returns (uint256)
     {
         require(currentlyIssuedShares + _share <= totalShares);
@@ -39,8 +41,8 @@ contract Playground is ERC721Enumerable, Ownable {
         _;
     }
 
-    function deposit(uint256 _amount) external payable positiveAmount(_amount) {
-        totalDepositedAmount += _amount;
+    function deposit() external payable {
+        totalDepositedAmount += msg.value;
     }
 
     function claim(uint256 _tokenId) external {
