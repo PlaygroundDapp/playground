@@ -16,23 +16,28 @@ describe("Playground Contract", () => {
     owner = signers[0];
     shareholders.push({
       address: signers[1].address,
-      share: 50
+      share: 50,
+      signer: signers[1]
     });
     shareholders.push({
       address: signers[2].address,
-      share: 20
+      share: 20,
+      signer: signers[2]
     });
     shareholders.push({
       address: signers[3].address,
-      share: 10
+      share: 10,
+      signer: signers[3]
     });
     shareholders.push({
       address: signers[4].address,
-      share: 10
+      share: 10,
+      signer: signers[4]
     });
     shareholders.push({
       address: signers[5].address,
-      share: 10
+      share: 10,
+      signer: signers[5]
     });
   });
 
@@ -96,6 +101,31 @@ describe("Playground Contract", () => {
       ).to.be.revertedWith(
         "Amount should be bigger than 0"
       );
+    });
+  });
+
+  describe("deposit", function () {
+    it("can deposit ether", async () => {
+      const oneETH = ethers.utils.parseEther("1");
+      const shareHolderETHBefore = await ethers.provider.getBalance(shareholders[0].address);
+      expect(
+        await ethers.provider.getBalance(playground.address)
+      ).to.equal(0);
+
+      await playground.connect(shareholders[0].signer).
+      setApprovalForAll(playground.address, true);
+      await playground.connect(shareholders[0].signer)
+      .deposit({ value: oneETH });
+
+      expect(
+        await ethers.provider.getBalance(playground.address)
+      ).to.equal(oneETH);
+      expect(
+        await ethers.provider.getBalance(shareholders[0].address)
+      ).to.be.at.most(shareHolderETHBefore.sub(oneETH));
+      expect(
+        await playground.totalDepositedAmount()
+      ).to.equal(oneETH);
     });
   });
 });

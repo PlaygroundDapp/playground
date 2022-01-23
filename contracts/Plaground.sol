@@ -14,7 +14,7 @@ contract Playground is ERC721Enumerable, Ownable {
     mapping(uint256 => uint256) amountsClaimed; //tokenId => amounts claimed
     uint256 public totalShares = 100;
     uint256 currentlyIssuedShares;
-    uint256 totalDepositedAmount;
+    uint256 public totalDepositedAmount;
 
     constructor() ERC721("Playground", "PG") {}
 
@@ -40,8 +40,8 @@ contract Playground is ERC721Enumerable, Ownable {
         _;
     }
 
-    function deposit(uint256 _amount) external payable positiveAmount(_amount) {
-        totalDepositedAmount += _amount;
+    function deposit() external payable {
+        totalDepositedAmount += msg.value;
     }
 
     function claim(uint256 _tokenId) external {
