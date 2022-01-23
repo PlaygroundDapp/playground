@@ -2,6 +2,7 @@ import React from "react";
 import NameInput from "../misc/NameInput"
 import { mint } from "../../utils/common";
 import { useWeb3Context } from "../../hooks/useWeb3Context";
+import contract from "../../abis/contract-address.json";
 
 
 export default function Minting() {
@@ -30,7 +31,8 @@ export default function Minting() {
     const handleAddShareholder = async (shareholderAddress, amount) => {
         // const results = a
         console.log({ fields})
-        await mint("0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",account, fields.amount  );
+        console.log(contract.PlaygroundContract);
+        await mint(contract.PlaygroundContract,account, fields.amount  );
     };
 
     // React.useEffect(() => {

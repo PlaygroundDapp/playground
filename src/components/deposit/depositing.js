@@ -13,7 +13,7 @@ export default function Depositing() {
   const [totalDepositedAmount, setTotalDepositedAmount] = useState("--");
 
   const contract = useContract({
-    address: address.SampleContract,
+    address: address.PlaygroundContract,
     ABI: abi.abi,
     signingEnabled: true,
   });
