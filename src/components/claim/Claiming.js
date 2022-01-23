@@ -28,8 +28,8 @@ export default function Claiming() {
           <h2 className="mt-8">Tokens</h2>
           {tokens.map((token, idx) => (
             <div key={idx} className="mt-4">
-              <span className="mr-4">{token.toString()}</span>
-              <button className="btn-primary btn" onClick={() => claimEarnings(token.toString())}> Claim</button>
+              <span className="mr-4">{token.tokenId} - {token.share}%</span>
+              <button className="btn-primary btn" onClick={() => claimEarnings(token.tokenId)}> Claim</button>
             </div> 
           ))}
         </div>

@@ -132,7 +132,11 @@ export const getTokens = async (account) => {
 
         for (let i = 0; true; i++) {
             let token = await contract.tokenOfOwnerByIndex(account, i);
-            tokens.push(token);
+            let share = await contract.shares(token.toString());
+            tokens.push({
+                tokenId: token.toString(),
+                share: share.toString()
+            });
         }
     } catch (error) {
         console.log(tokens);
