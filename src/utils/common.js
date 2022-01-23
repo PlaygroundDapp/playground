@@ -1,5 +1,6 @@
 import { ethers } from 'ethers';
 import abi from "../abis/Playground.json";
+import contractAddress from "../abis/contract-address.json";
 
 export const getSignedContract = (address, contractABI) => {
     const { ethereum } = window;
@@ -100,15 +101,45 @@ export const deposit = async (contract, amount) => {
     }
 };
 
-export const claim = async (contract, tokenId) => {
+
+const getContract = () => {
+    const { ethereum } = window;
+
+    if (!ethereum) return
+
+    const provider = new ethers.providers.Web3Provider(ethereum);
+    const signer = provider.getSigner();
+    return new ethers.Contract(contractAddress.PlaygroundContract, abi.abi, signer);
+}
+
+export const claim = async (tokenId) => {
     try {
-        if (!contract) {
-            return;
-        }
+        const contract = getContract();
 
         const txn = await contract.claim(tokenId);
+        console.log(txn);
         await txn.wait();
     } catch (error) {
         console.log(error);
+    }
+};
+
+
+export const getTokens = async (account) => {
+    const tokens = [];
+    try {
+        const contract = getContract();
+
+        for (let i = 0; true; i++) {
+            let token = await contract.tokenOfOwnerByIndex(account, i);
+            let share = await contract.shares(token.toString());
+            tokens.push({
+                tokenId: token.toString(),
+                share: share.toString()
+            });
+        }
+    } catch (error) {
+        console.log(tokens);
+        return tokens;
     }
 };
