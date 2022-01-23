@@ -14,7 +14,7 @@ contract Playground is ERC721Enumerable, Ownable {
     mapping(uint256 => uint256) public shares; // tokenId => share amount
     mapping(uint256 => uint256) amountsClaimed; //tokenId => amounts claimed
     uint256 public totalShares = 100;
-    uint256 public currentlyIssuedShares;
+    uint256 currentlyIssuedShares;
     uint256 public totalDepositedAmount;
 
     constructor() ERC721("Playground", "PG") {}
