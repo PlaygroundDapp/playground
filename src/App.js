@@ -4,6 +4,7 @@ import MintPage from "./pages/Mint";
 import ClaimPage from "./pages/Claim";
 import "./input.css";
 import { Web3ContextProvider } from "./context/Web3Context";
+import DepositPage from "./pages/Deposit";
 
 function App() {
   return (
@@ -16,6 +17,7 @@ function App() {
           {/* <Route path="/" exact > <MintPage /> </Route> */}
           <Route path="/" element={<MintPage />} />
           <Route path="/claim" element={<ClaimPage />} />
+          <Route path="/deposit" element={<DepositPage />} />
         </Routes>
       </Router>
     </Web3ContextProvider>

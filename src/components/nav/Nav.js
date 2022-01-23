@@ -12,6 +12,9 @@ export default function NavBar(){
         }, {
             name: "Claim",
             route: "/claim"
+        }, {
+            name: "Deposit",
+            route: "/deposit"
         }
     ]
     // const handleConnectWallet = (account) => {
