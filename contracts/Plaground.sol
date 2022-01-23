@@ -21,6 +21,7 @@ contract Playground is ERC721Enumerable, Ownable {
     function mint(address _to, uint256 _share)
         public
         onlyOwner
+        positiveAmount(_share)
         returns (uint256)
     {
         require(currentlyIssuedShares + _share <= totalShares);

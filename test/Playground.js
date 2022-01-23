@@ -89,5 +89,13 @@ describe("Playground Contract", () => {
         totalShares
       ).to.equal(await playground.totalShares());
     });
+
+    it("cannot mint with 0 share", async () => {
+      await expect(
+        playground.connect(owner).mint(shareholders[0].address, 0)
+      ).to.be.revertedWith(
+        "Amount should be bigger than 0"
+      );
+    });
   });
 });
