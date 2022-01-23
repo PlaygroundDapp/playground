@@ -1,18 +1,39 @@
-import { claim } from "../../utils/common"
+import { useState } from "react";
+import { claim, getTokens } from "../../utils/common"
+import { useWeb3Context } from "../../hooks/useWeb3Context";
 
 
 export default function Claiming() {
-    const claimEarnings = () => {
-      claim();
-    }
+  const { account } = useWeb3Context();
+  const [tokens, setTokens] = useState([]);
 
-    return (
-      <div className="container mx-auto">  
-          <h1 className="text-xl mt-16"> Claim your earnings</h1>
-          
-          <div className="mt-8">
-            <button className="btn-primary btn" onClick={() => claimEarnings()}> Claim</button>
-          </div>
-      </div>
-    )
+  const claimEarnings = (tokenId) => {
+    claim(tokenId);
+  }
+
+  const getTokensForUser = async () => {
+    setTokens(await getTokens(account));
+    console.log(tokens);
+  }
+
+  return (
+    <div className="container mx-auto">  
+        <h1 className="text-xl mt-16"> Claim your earnings</h1>
+        
+        <div className="mt-8">
+          <button className="btn-primary btn" onClick={() => getTokensForUser()}> Get Tokens</button>
+        </div>
+
+        <div>
+          <h2 className="mt-8">Tokens</h2>
+          {tokens.map((token, idx) => (
+            <div key={idx} className="mt-4">
+              <span className="mr-4">{token.toString()}</span>
+              <button className="btn-primary btn" onClick={() => claimEarnings(token.toString())}> Claim</button>
+            </div> 
+          ))}
+        </div>
+
+    </div>
+  )
 }
