@@ -1,9 +1,12 @@
 import React from "react";
 import NameInput from "../misc/NameInput"
-import { checkIfWalletIsConnected, connectWallet, mint } from "../../utils/common";
+import { mint } from "../../utils/common";
+import { useWeb3Context } from "../../hooks/useWeb3Context";
 
 
 export default function Minting() {
+    const {account, isPageLoaded, connectWallet} = useWeb3Context();
+
     const [fields, setFields] = React.useState({
         publicKey: "",
         amount: "",
@@ -15,29 +18,29 @@ export default function Minting() {
             [e.target.name]:e.target.value
         })
     }
-    const [pageLoaded, setPageLoaded] = React.useState(false);
+    // const [pageLoaded, setPageLoaded] = React.useState(false);
 
-    const [metaAccount, setMetaAccount] = React.useState(null);
-    const handleConnectWallet = (account) => {
-        console.log({ account })
-        if (account) setMetaAccount(account)
+    // const [metaAccount, setMetaAccount] = React.useState(null);
+    // const handleConnectWallet = (account) => {
+    //     console.log({ account })
+    //     if (account) setMetaAccount(account)
 
-    }
+    // }
 
     const handleAddShareholder = async (shareholderAddress, amount) => {
         // const results = a
         console.log({ fields})
-        await mint("0x5FbDB2315678afecb367f032d93F642f64180aa3",metaAccount, fields.amount  );
+        await mint("0x5FbDB2315678afecb367f032d93F642f64180aa3",account, fields.amount  );
     };
 
-    React.useEffect(() => {
-        const initialise = async () => {
-           await checkIfWalletIsConnected(handleConnectWallet)
-           setPageLoaded(true)
-        }
-        initialise();
+    // React.useEffect(() => {
+    //     const initialise = async () => {
+    //        await checkIfWalletIsConnected(handleConnectWallet)
+    //        setPageLoaded(true)
+    //     }
+    //     initialise();
          
-    },[])
+    // },[])
     const shareholderTest = [
         {
             address: "0xsos0s",
@@ -48,13 +51,13 @@ export default function Minting() {
             share: 30,
         },
     ]
-    if (!pageLoaded) return  <div>Loading.... </div>
+    if (!isPageLoaded) return  <div>Loading.... </div>
     return (
         <div className="container mx-auto">
             <div className="mt-16">
-                    {metaAccount ? <>
-                    <div>Meta Mast Connected: {metaAccount}</div>
-                    </>: <button className="btn-primary btn" onClick={() => connectWallet(handleConnectWallet)}> Connect your wallet</button> }
+                    {account ? <>
+                    <div>Meta Mast Connected: {account}</div>
+                    </>: <button className="btn-primary btn" onClick={connectWallet}> Connect your wallet</button> }
                 
                 
 
