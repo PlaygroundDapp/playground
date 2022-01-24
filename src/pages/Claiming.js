@@ -1,15 +1,26 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 import { useWeb3Context } from "../hooks/useWeb3Context";
 import { usePlaygroundProject } from "../hooks/usePlaygroundProject";
 import address from "../abis/contract-address.json";
 
 export default function Claim() {
-  const { account } = useWeb3Context();
+  const { account, provider } = useWeb3Context();
   const [tokens, setTokens] = useState([]);
   
   // TODO: get contract address from user input
   const contract = usePlaygroundProject(address.PlaygroundContract);
+
+  useEffect(() => {
+    if (!contract || !provider) {
+      return;
+    }
+    provider.once("block", () => {
+      contract.on("Claim", () => {
+        window.alert("Successfully Claimed");
+      });
+    });
+}, [contract, provider]);
 
   const claimEarnings = async (tokenId) => {
     // copied `export const claim = async (tokenId) => {` from utils.common.js

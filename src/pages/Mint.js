@@ -1,4 +1,4 @@
-import React from "react";
+import React, {useEffect} from "react";
 import NameInput from "../components/misc/NameInput"
 
 import { useWeb3Context } from "../hooks/useWeb3Context";
@@ -6,10 +6,21 @@ import { usePlaygroundProject } from "../hooks/usePlaygroundProject";
 import address from "../abis/contract-address.json";
 
 export default function Mint() {
-    const {account, isPageLoaded, connectWallet} = useWeb3Context();
+    const {account, isPageLoaded, connectWallet, provider} = useWeb3Context();
     
     // TODO: get contract address from user input
     const contract = usePlaygroundProject(address.PlaygroundContract);
+
+    useEffect(() => {
+        if (!contract || !provider) {
+          return;
+        }
+        provider.once("block", () => {
+          contract.on("Mint", () => {
+              window.alert("Successfully Minted");
+          });
+        });
+    }, [contract, provider]);
 
     const [fields, setFields] = React.useState({
         publicKey: "",
