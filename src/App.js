@@ -13,16 +13,16 @@ import Deposit from "./pages/Deposit";
 function App() {
   return (
     <Web3ContextProvider>
-      <Header />
-      <Container>
-        <Router>
+      <Router>
+        <Header />
+        <Container>
           <Routes>
             <Route path="/" element={<Mint />} />
             <Route path="/claim" element={<Claim />} />
             <Route path="/deposit" element={<Deposit />} />
           </Routes>
-        </Router>
-      </Container>
+        </Container>
+      </Router>
     </Web3ContextProvider>
   );
 }
