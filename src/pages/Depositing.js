@@ -1,10 +1,9 @@
-import { useContract } from "../hooks/useContract";
-import address from "../abis/contract-address.json";
-import abi from "../abis/Playground.json";
-import { useState } from "react/cjs/react.development";
-import { useWeb3Context } from "../hooks/useWeb3Context";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { ethers } from "ethers";
+
+import { useWeb3Context } from "../hooks/useWeb3Context";
+import { usePlayground } from "../hooks/usePlayground";
+import address from "../abis/contract-address.json";
 
 export default function Deposit() {
   const { account, provider, isActive, connectWallet } = useWeb3Context();
@@ -12,11 +11,8 @@ export default function Deposit() {
   const [myETHBalance, setMyETHBalance] = useState(0);
   const [totalDepositedAmount, setTotalDepositedAmount] = useState("--");
 
-  const contract = useContract({
-    address: address.PlaygroundContract,
-    ABI: abi.abi,
-    signingEnabled: true,
-  });
+  // TODO: get contract address from user input
+  const contract = usePlayground(address.PlaygroundContract);
 
   useEffect(() => {
     async function fetchETHBalance() {
