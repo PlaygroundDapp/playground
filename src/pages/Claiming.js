@@ -1,9 +1,9 @@
 import { useState } from "react";
-import { claim, getTokens } from "../../utils/common"
-import { useWeb3Context } from "../../hooks/useWeb3Context";
+import { claim, getTokens } from "../utils/common"
+import { useWeb3Context } from "../hooks/useWeb3Context";
 
 
-export default function Claiming() {
+export default function Claim() {
   const { account } = useWeb3Context();
   const [tokens, setTokens] = useState([]);
 

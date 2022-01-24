@@ -1,11 +1,11 @@
 import React from "react";
-import NameInput from "../misc/NameInput"
-import { mint } from "../../utils/common";
-import { useWeb3Context } from "../../hooks/useWeb3Context";
-import contract from "../../abis/contract-address.json";
+import NameInput from "../components/misc/NameInput"
+import { mint } from "../utils/common";
+import { useWeb3Context } from "../hooks/useWeb3Context";
+import contract from "../abis/contract-address.json";
 
 
-export default function Minting() {
+export default function Mint() {
     const {account, isPageLoaded, connectWallet} = useWeb3Context();
 
     const [fields, setFields] = React.useState({

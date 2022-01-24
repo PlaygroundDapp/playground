@@ -1,13 +1,12 @@
-import { useContract } from "../../hooks/useContract";
-import address from "../../abis/contract-address.json";
-import abi from "../../abis/Playground.json";
+import { useContract } from "../hooks/useContract";
+import address from "../abis/contract-address.json";
+import abi from "../abis/Playground.json";
 import { useState } from "react/cjs/react.development";
-import { useWeb3Context } from "../../hooks/useWeb3Context";
+import { useWeb3Context } from "../hooks/useWeb3Context";
 import { useEffect } from "react";
 import { ethers } from "ethers";
 
-
-export default function Depositing() {
+export default function Deposit() {
   const { account, provider, isActive, connectWallet } = useWeb3Context();
 
   const [myETHBalance, setMyETHBalance] = useState(0);
