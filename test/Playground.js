@@ -36,7 +36,7 @@ describe("Playground Contract", async function () {
 
   beforeEach(async () => {
     const Playground = await ethers.getContractFactory("Playground");
-    playground = await Playground.deploy();
+    playground = await Playground.deploy("Playground", "PG");
     await playground.deployed();
   });
 

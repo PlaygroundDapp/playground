@@ -1,12 +1,16 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.2;
+pragma solidity ^0.8.0;
 
 import "./Playground.sol";
 
 // Playground is for creating a Project contract for our users
 contract ProjectFactory {
+
+    event ProjectCreated(address _address, string _name, string _symbol);
+
     function createProject(
-        string calldata title,
+        string calldata name,
+        string calldata symbol,
         address[] memory shareholders,
         uint256[] memory shareAmounts
     ) external returns (address) {
@@ -18,10 +22,12 @@ contract ProjectFactory {
         }
         require(shareSum == 100, "sum of shares should be 100");
 
-        Playground prj = new Playground(title);
+        Playground prj = new Playground(name, symbol);
         for (uint256 i = 0; i < shareholders.length; i++) {
             prj.mint(shareholders[i], shareAmounts[i]);
         }
+
+        emit ProjectCreated(address(prj), name, symbol);
 
         return address(prj);
     }
