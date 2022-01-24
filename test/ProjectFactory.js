@@ -13,21 +13,6 @@ describe("Project Factory Contract", async function () {
   });
 
   describe("createProject", function () {
-    it("create project to emit ProjectCreated event", async function () {
-        await expect(projectFactory.connect(owner).createProject(
-            'To The Moon',
-            'TTM',
-            [
-                shareholder1.address,
-                shareholder2.address,
-            ],
-            [
-                51,
-                49
-            ]
-        )).to.emit(projectFactory, "ProjectCreated");
-    });
-
     it("create project to deploy a new contract", async function() {
         const tx = await projectFactory.connect(owner).createProject(
             'To The Moon',
@@ -49,8 +34,9 @@ describe("Project Factory Contract", async function () {
         const projectAddress = events[0].args[0];
         const Playground = await ethers.getContractFactory("Playground");
         const playground = await Playground.attach(projectAddress);
-        console.log();
 
+        expect(await playground.name()).to.equal('To The Moon');
+        expect(await playground.symbol()).to.equal('TTM');
         expect(playground).to.have.deep.property('mint');
         expect(playground).to.have.deep.property('deposit');
         expect(playground).to.have.deep.property('claim');
