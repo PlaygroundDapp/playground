@@ -5,6 +5,9 @@ import "./Playground.sol";
 
 // Playground is for creating a Project contract for our users
 contract ProjectFactory {
+
+    event ProjectCreated(address _address, string _name, string _symbol);
+
     function createProject(
         string calldata name,
         string calldata symbol,
@@ -23,6 +26,8 @@ contract ProjectFactory {
         for (uint256 i = 0; i < shareholders.length; i++) {
             prj.mint(shareholders[i], shareAmounts[i]);
         }
+
+        emit ProjectCreated(address(prj), name, symbol);
 
         return address(prj);
     }
