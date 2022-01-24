@@ -1,12 +1,15 @@
 import React from "react";
-import NameInput from "../misc/NameInput"
-import { mint } from "../../utils/common";
-import { useWeb3Context } from "../../hooks/useWeb3Context";
-import contract from "../../abis/contract-address.json";
+import NameInput from "../components/misc/NameInput"
 
+import { useWeb3Context } from "../hooks/useWeb3Context";
+import { usePlayground } from "../hooks/usePlayground";
+import address from "../abis/contract-address.json";
 
-export default function Minting() {
+export default function Mint() {
     const {account, isPageLoaded, connectWallet} = useWeb3Context();
+    
+    // TODO: get contract address from user input
+    const contract = usePlayground(address.PlaygroundContract);
 
     const [fields, setFields] = React.useState({
         publicKey: "",
@@ -31,8 +34,27 @@ export default function Minting() {
     const handleAddShareholder = async (shareholderAddress, amount) => {
         // const results = a
         console.log({ fields})
-        console.log(contract.PlaygroundContract);
-        await mint(contract.PlaygroundContract,account, fields.amount  );
+        // console.log(contract.PlaygroundContract);
+        // await mint(contract.PlaygroundContract,account, fields.amount  );
+        // copied `export const mint = async (address, shareholderAddress, shareAmount) => {` from utils.common.js
+        try {
+            // if (!address) {
+            //     return;
+            // }
+            // const { ethereum } = window;
+    
+            // if (!ethereum) return
+        
+            // const provider = new ethers.providers.Web3Provider(ethereum);
+            // const signer = provider.getSigner();
+            // const contract = new ethers.Contract(address, abi.abi, signer);
+    
+            const txn = await contract.mint(shareholderAddress, amount);
+            console.log({ txn });
+            await txn.wait();
+        } catch (error) {
+            console.log(error);
+        }
     };
 
     // React.useEffect(() => {

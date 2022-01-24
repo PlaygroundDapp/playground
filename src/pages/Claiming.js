@@ -19,7 +19,7 @@ export default function Claiming() {
   return (
     <div className="container mx-auto">  
         <h1 className="text-xl mt-16"> Claim your earnings</h1>
-        
+
         <div className="mt-8">
           <button className="btn-primary btn" onClick={() => getTokensForUser()}> Get Tokens</button>
         </div>
