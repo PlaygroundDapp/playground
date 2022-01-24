@@ -7,7 +7,7 @@ import Header from "./components/nav/Nav.js";
 import Container from "./components/containers/MainContainer";
 
 import Mint from "./pages/Mint";
-import Claim from "./pages/Claiming";
+import Claim from "./pages/Claim";
 import Deposit from "./pages/Deposit";
 
 function App() {
