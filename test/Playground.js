@@ -47,10 +47,8 @@ describe("Playground Contract", async function () {
   };
 
   const niceDeposit = async function(amount) {
-    await playground.connect(shareholders[0].signer).
-    setApprovalForAll(playground.address, true);
-    await playground.connect(shareholders[0].signer)
-    .deposit({ value: amount });
+    await playground.connect(owner).setApprovalForAll(playground.address, true);
+    await playground.connect(owner).deposit({ value: amount });
   };
 
   const getSnapshot = async function() {
@@ -84,6 +82,11 @@ describe("Playground Contract", async function () {
       const snapshot = await getSnapshot();
       let totalShares = 0;
 
+      expect(
+        await playground).to.emit(playground, "Mint").catch(function () {
+          console.log("Promise Rejected");
+        });
+
       for(let i = 0; i < shareholders.length; i++) { 
         const address = shareholders[i].address;
         const tokens = snapshot[address];
@@ -113,7 +116,7 @@ describe("Playground Contract", async function () {
   describe("deposit", function () {
     it("can deposit ether", async function () {
       const oneETH = ethers.utils.parseEther("1");
-      const shareHolderETHBefore = await ethers.provider.getBalance(shareholders[0].address);
+      const ownerETHBefore = await ethers.provider.getBalance(owner.address);
       expect(
         await ethers.provider.getBalance(playground.address)
       ).to.equal(0);
@@ -124,11 +127,15 @@ describe("Playground Contract", async function () {
         await ethers.provider.getBalance(playground.address)
       ).to.equal(oneETH);
       expect(
-        await ethers.provider.getBalance(shareholders[0].address)
-      ).to.be.at.most(shareHolderETHBefore.sub(oneETH));
+        await ethers.provider.getBalance(owner.address)
+      ).to.be.at.most(ownerETHBefore.sub(oneETH));
       expect(
         await playground.totalDepositedAmount()
       ).to.equal(oneETH);
+      expect(
+        await playground).to.emit(playground, "Deposit").withArgs(oneETH).catch(function () {
+          console.log("Promise Rejected");
+        });
     });
   });
 
@@ -138,29 +145,62 @@ describe("Playground Contract", async function () {
       await niceDeposit(ethers.utils.parseEther("100"));
 
       const snapshot = await getSnapshot();
-      const tokens = snapshot[shareholders[0].address];
-
-      expect(tokens.length).to.equal(1);
-
-      const shareHolderETHBefore = await ethers.provider.getBalance(shareholders[0].address);
+      const [shareholder1, shareholder2] = shareholders;
+      const shareholder1ETHBefore = await ethers.provider.getBalance(shareholder1.address);
+      const shareholder2ETHBefore = await ethers.provider.getBalance(shareholder2.address);
       const contractETHBefore = await ethers.provider.getBalance(playground.address);
+
+      expect(snapshot[shareholder1.address].length).to.equal(1);
+      expect(snapshot[shareholder2.address].length).to.equal(1);
+
+      const shareholder1Token = snapshot[shareholder1.address][0]; // 50% share
+      const shareholder2Token = snapshot[shareholder2.address][0]; // 20% share
 
       expect(contractETHBefore).to.equal(ethers.utils.parseEther("100"));
 
-      await playground.connect(shareholders[0].signer).claim(tokens[0].tokenId);
+      await expect(
+        playground.connect(shareholder1.signer).claim(shareholder1Token.tokenId)
+      ).to.emit(playground, "Claim");
 
       expect(
-        await ethers.provider.getBalance(shareholders[0].address)
+        await ethers.provider.getBalance(shareholder1.address)
       ).to.be.above(
-        shareHolderETHBefore.add(ethers.utils.parseEther("49"))
+        shareholder1ETHBefore.add(ethers.utils.parseEther("49"))
       );
       expect(
         await ethers.provider.getBalance(playground.address)
       ).to.equal(ethers.utils.parseEther("50"));
 
       await expect(
-        playground.connect(shareholders[0].signer).claim(tokens[0].tokenId)
+        playground.connect(shareholder1.signer).claim(shareholder1Token.tokenId)
       ).to.be.revertedWith("You dont deserve shit.");
+
+      // More deposit
+      await niceDeposit(ethers.utils.parseEther("100"));
+
+      // First time claim for share holder 2
+      await playground.connect(shareholder2.signer).claim(shareholder2Token.tokenId);
+
+      expect(
+        await ethers.provider.getBalance(shareholder2.address)
+      ).to.be.above(
+        shareholder2ETHBefore.add(ethers.utils.parseEther("39"))
+      );
+      expect(
+        await ethers.provider.getBalance(playground.address)
+      ).to.equal(ethers.utils.parseEther("110"));
+
+      // Second time claim for share holder 1
+      await playground.connect(shareholder1.signer).claim(shareholder1Token.tokenId);
+      expect(
+        await ethers.provider.getBalance(shareholder1.address)
+      ).to.be.above(
+        shareholder1ETHBefore.add(ethers.utils.parseEther("99"))
+      );
+      expect(
+        await ethers.provider.getBalance(playground.address)
+      ).to.equal(ethers.utils.parseEther("60"));
+
     })
   });
 });

@@ -17,7 +17,11 @@ contract Playground is ERC721Enumerable, Ownable {
     uint256 currentlyIssuedShares;
     uint256 public totalDepositedAmount;
 
-    constructor() ERC721("Playground", "PG") {}
+    constructor(string memory projectTitle) ERC721(projectTitle, projectTitle) {}
+
+    event Mint(address _to, uint256 _share);
+    event Deposit(uint256 _amount);
+    event Claim(address shareHolder, uint256 amountClaimed);
 
     function mint(address _to, uint256 _share)
         public
@@ -31,6 +35,7 @@ contract Playground is ERC721Enumerable, Ownable {
         shares[tokenId] = _share;
         _tokenIds.increment();
         currentlyIssuedShares += _share;
+        emit Mint(_to, _share);
         return tokenId;
     }
 
@@ -43,6 +48,7 @@ contract Playground is ERC721Enumerable, Ownable {
 
     function deposit() external payable {
         totalDepositedAmount += msg.value;
+        emit Deposit(msg.value);
     }
 
     function claim(uint256 _tokenId) external {
@@ -61,5 +67,6 @@ contract Playground is ERC721Enumerable, Ownable {
             revert("Claim failed");
         }
         amountsClaimed[_tokenId] += amountToSend;
+        emit Claim(msg.sender, amountToSend);
     }
 }

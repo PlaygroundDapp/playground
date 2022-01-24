@@ -1,17 +1,155 @@
-import React from "react";
-import Header from "../components/nav/Nav.js";
-import Container from "../components/containers/MainContainer";
-import Minting from "../components/mint/Minting"
+import React, {useEffect} from "react";
+import NameInput from "../components/misc/NameInput"
 
-export default function MintPage() {
-    return (
-        <>
-        <Header />
-        <Container>
-        <Minting />
-        </Container>
-        
-        </>
-    )
+import { useWeb3Context } from "../hooks/useWeb3Context";
+import { usePlaygroundProject } from "../hooks/usePlaygroundProject";
+import address from "../abis/contract-address.json";
+
+export default function Mint() {
+    const {account, isPageLoaded, connectWallet, provider} = useWeb3Context();
     
+    // TODO: get contract address from user input
+    const contract = usePlaygroundProject(address.PlaygroundContract);
+
+
+    const [fields, setFields] = React.useState({
+        publicKey: "",
+        amount: "",
+    })
+    const [shareholders, setShareholders] = React.useState([]);
+    const handleInputChange = (e) => {
+        console.log({ e, [e.target.name]:e.target.value })
+        setFields({
+            ...fields,
+            [e.target.name]:e.target.value
+        })
+    }
+    
+    const handleAddShareholder = async () => {
+        try {
+            await contract.mint(fields.publicKey, fields.amount )
+            setShareholders([
+            ...shareholders, 
+            {
+                tokenId: shareholders.length,
+                tokenOwner: fields.publicKey,
+                tokenShare: fields.amount,
+            },
+        ]);
+        setFields({...fields, amount: "", publicKey:""})
+
+        } catch (error) {
+            console.log({ error })
+            alert("Sorry there was an error with your request! Please try again")
+            
+        }
+    };
+
+    const handleGetTokensAndShares = async () => {
+        try {
+            const tokenResponse = await contract._tokenIds();
+            const tokens = Number(tokenResponse.toString());
+            if (tokens === 0) return null;
+            let shareholders = [];
+            for (let i = 0; i < tokens ; i++) {
+                let tokenOwner = await contract.ownerOf(i)
+                let ts = await contract.shares(i)
+                let tokenShare = ts.toNumber()
+                shareholders.push({ tokenId: i, tokenOwner, tokenShare})
+                console.log({ tok: i + 1, tokenShare, tokenOwner })
+              }
+              console.log({ shareholders})
+              return setShareholders(shareholders)
+        } catch (error) {
+            console.log({ error })
+            
+        }
+    }
+    const initialise = async () => {
+        await handleGetTokensAndShares();
+        }
+
+    useEffect(() => {
+            if (!contract || !provider) {
+              return;
+            }
+            initialise();
+            provider.once("block", () => {
+              contract.on("mint", () => {
+                  window.alert("Successfully Minted");
+              });
+            });
+        }, [contract, provider]);
+    if (!isPageLoaded) return  <div>Loading.... </div>
+    return (
+        <div className="container mx-auto">
+            <h1 className="text-xl mt-16"> Mint a new project </h1>
+            <div className="mt-8">
+                <NameInput displayName="Project Name" name="projectName"  onChange={handleInputChange}/>
+        </div>
+        <hr className="mt-4"></hr>
+        <h1 className="text-xl mt-16"> Mint your shareholders </h1>
+        <div className="mt-8 flex gap-6">
+        <NameInput placeholder="Public Key" value={fields.publicKey} name="publicKey"  onChange={handleInputChange}/>
+        <NameInput 
+            placeholder="Amount"  
+            value={fields.amount}  
+            name="amount"  
+            onChange={handleInputChange} 
+            buttonName="Add" 
+            buttonClick={handleAddShareholder}
+            type="number"
+            disabled={fields.publicKey.length < 2 || !fields.amount.length > 0}
+        />
+            </div>
+        <div className="mt-8">
+               
+                <div className="mt-4">
+                <div className="flex flex-col">
+ <div className="overflow-x-auto sm:-mx-6 lg:-mx-8">
+        <div className="py-2 inline-block min-w-full sm:px-6 lg:px-8">
+        <div className="overflow-hidden">
+            <table className="min-w-full">
+            <thead className="bg-white border-b">
+                <tr>
+                <th scope="col" className="text-sm font-medium text-gray-900 px-6 py-4 text-left">
+                    Token Id
+                </th>
+                <th scope="col" className="text-sm font-medium text-gray-900 px-6 py-4 text-left">
+                    Shareholder Address
+                </th>
+                <th scope="col" className="text-sm font-medium text-gray-900 px-6 py-4 text-left">
+                    Share Percent
+                </th>
+                </tr>
+            </thead>
+            <tbody>
+                {shareholders && shareholders.map((s,i ) => (
+                    <tr key={i} className="bg-white border-b">
+                          <td className="text-sm text-gray-900 font-light px-6 py-4 whitespace-nowrap">
+                            {s.tokenId}
+                        </td>
+                        <td className="text-sm text-gray-900 font-light px-6 py-4 whitespace-nowrap">
+                            {s.tokenOwner}
+                            {(account === s.tokenOwner) && "(Your address)"}
+                        </td>
+                        <td className="text-sm text-gray-900 font-light px-6 py-4 whitespace-nowrap">
+                    {s.tokenShare}
+
+                        </td>
+                    </tr>
+                ))}
+            </tbody>
+            </table>
+            {shareholders.length === 0 && <div className="text-center"> You currently haven't added any shareholders</div>}
+        </div>
+        </div>
+</div>
+</div>
+
+                </div>
+        </div>
+
+    </div>
+    )
 }

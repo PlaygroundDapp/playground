@@ -1,13 +1,12 @@
 import React from "react";
-import {Link} from "react-router-dom"
+import {Link, useLocation} from "react-router-dom"
 import { useWeb3Context } from "../../hooks/useWeb3Context";
 // import { checkIfWalletIsConnected, connectWallet } from "../../utils/common"
 
 export default function NavBar(){
-  const { isActive, connectWallet, account } = useWeb3Context();
-
-    const hash = global.window && window.location.hash;
+    const location = useLocation();
     // const [metaAccount, setMetaAccount] = React.useState(null);
+    const { isActive, connectWallet, account } = useWeb3Context();
     const routes = [
         {
             name: "Mint",
@@ -38,7 +37,7 @@ export default function NavBar(){
                         <div
                             key={route.name}
                             className={`text-gray-500 ${
-                                hash === route.route.split("/")[1] &&
+                                location.pathname === route.route &&
                                 "border-b-2 border-primary text-primary"
                             } py-2 hover:text-primary`}
                         >
