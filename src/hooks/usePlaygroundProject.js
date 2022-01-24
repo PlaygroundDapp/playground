@@ -1,7 +1,7 @@
 import { useContract } from "./useContract";
 import abi from "../abis/Playground.json";
 
-export function usePlayground(address) {
+export function usePlaygroundProject(address) {
   return useContract({
     address: address,
     ABI: abi.abi,
