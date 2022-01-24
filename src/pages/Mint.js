@@ -22,33 +22,11 @@ export default function Mint() {
             [e.target.name]:e.target.value
         })
     }
-    // const [pageLoaded, setPageLoaded] = React.useState(false);
-
-    // const [metaAccount, setMetaAccount] = React.useState(null);
-    // const handleConnectWallet = (account) => {
-    //     console.log({ account })
-    //     if (account) setMetaAccount(account)
-
-    // }
-
+    
     const handleAddShareholder = async (shareholderAddress, amount) => {
-        // const results = a
         console.log({ fields})
-        // console.log(contract.PlaygroundContract);
-        // await mint(contract.PlaygroundContract,account, fields.amount  );
         // copied `export const mint = async (address, shareholderAddress, shareAmount) => {` from utils.common.js
         try {
-            // if (!address) {
-            //     return;
-            // }
-            // const { ethereum } = window;
-    
-            // if (!ethereum) return
-        
-            // const provider = new ethers.providers.Web3Provider(ethereum);
-            // const signer = provider.getSigner();
-            // const contract = new ethers.Contract(address, abi.abi, signer);
-    
             const txn = await contract.mint(shareholderAddress, amount);
             console.log({ txn });
             await txn.wait();
@@ -57,14 +35,6 @@ export default function Mint() {
         }
     };
 
-    // React.useEffect(() => {
-    //     const initialise = async () => {
-    //        await checkIfWalletIsConnected(handleConnectWallet)
-    //        setPageLoaded(true)
-    //     }
-    //     initialise();
-         
-    // },[])
     const shareholderTest = [
         {
             address: "0xsos0s",

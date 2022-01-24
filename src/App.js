@@ -6,23 +6,23 @@ import { Web3ContextProvider } from "./context/Web3Context";
 import Header from "./components/nav/Nav.js";
 import Container from "./components/containers/MainContainer";
 
-import Mint from "./pages/Minting";
+import Mint from "./pages/Mint";
 import Claim from "./pages/Claiming";
-import Deposit from "./pages/Depositing";
+import Deposit from "./pages/Deposit";
 
 function App() {
   return (
     <Web3ContextProvider>
-      <Header />
-      <Container>
-        <Router>
+      <Router>
+        <Header />
+        <Container>
           <Routes>
             <Route path="/" element={<Mint />} />
             <Route path="/claim" element={<Claim />} />
             <Route path="/deposit" element={<Deposit />} />
           </Routes>
-        </Router>
-      </Container>
+        </Container>
+      </Router>
     </Web3ContextProvider>
   );
 }
