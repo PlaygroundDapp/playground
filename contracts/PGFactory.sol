@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.2;
 
-import "./Playground.sol";
+import "./PGProject.sol";
 
 // Playground is for creating a Project contract for our users
-contract ProjectFactory {
+contract PGFactory {
     function createProject(
         string calldata title,
         address[] memory shareholders,
@@ -18,7 +18,7 @@ contract ProjectFactory {
         }
         require(shareSum == 100, "sum of shares should be 100");
 
-        Playground prj = new Playground(title);
+        PGProject prj = new PGProject(title);
         for (uint256 i = 0; i < shareholders.length; i++) {
             prj.mint(shareholders[i], shareAmounts[i]);
         }
