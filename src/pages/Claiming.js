@@ -1,44 +1,11 @@
 import { useState } from "react";
+import { claim, getTokens } from "../../utils/common"
+import { useWeb3Context } from "../../hooks/useWeb3Context";
 
-import { useWeb3Context } from "../hooks/useWeb3Context";
-import { usePlayground } from "../hooks/usePlayground";
-import address from "../abis/contract-address.json";
 
-export default function Claim() {
+export default function Claiming() {
   const { account } = useWeb3Context();
   const [tokens, setTokens] = useState([]);
-  // TODO: get contract address from user input
-  const contract = usePlayground(address.PlaygroundContract);
-
-  const claim = async (tokenId) => {
-    // copied `export const claim = async (tokenId) => {` from utils.common.js
-    try {
-      // const contract = getContract();
-      const txn = await contract.claim(tokenId);
-      console.log(txn);
-      await txn.wait();
-    } catch (error) {
-      console.log(error);
-    }
-  }
-  const getTokens = async (account) => {
-    // copied `export const getTokens = async (account) => {` from utils.common.js
-    const tokens = [];
-    try {
-        // const contract = getContract();
-        for (let i = 0; true; i++) {
-            let token = await contract.tokenOfOwnerByIndex(account, i);
-            let share = await contract.shares(token.toString());
-            tokens.push({
-                tokenId: token.toString(),
-                share: share.toString()
-            });
-        }
-    } catch (error) {
-        console.log(tokens);
-    }
-    return tokens;
-  }
 
   const claimEarnings = (tokenId) => {
     claim(tokenId);
