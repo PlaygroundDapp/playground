@@ -1,8 +1,11 @@
 import React from "react";
 import {Link} from "react-router-dom"
+import { useWeb3Context } from "../../hooks/useWeb3Context";
 // import { checkIfWalletIsConnected, connectWallet } from "../../utils/common"
 
 export default function NavBar(){
+  const { isActive, connectWallet, account } = useWeb3Context();
+
     const hash = global.window && window.location.hash;
     // const [metaAccount, setMetaAccount] = React.useState(null);
     const routes = [
@@ -17,19 +20,6 @@ export default function NavBar(){
             route: "/deposit"
         }
     ]
-    // const handleConnectWallet = (account) => {
-    //     console.log({ account })
-    //     if (account) setMetaAccount(account)
-
-    // }
-
-    // React.useEffect(() => {
-    //     const initialise = async () => {
-    //        await checkIfWalletIsConnected(handleConnectWallet)
-    //     }
-    //     initialise();
-         
-    // },[])
 
 
     return (
@@ -68,6 +58,20 @@ export default function NavBar(){
                 </div> */}
             </div>
         </header>
+        {!isActive ? 
+         <div className="text-center mt-4">
+         <button className="btn-primary btn" onClick={connectWallet}> Connect wallet</button> 
+
+     </div>
+        :
+        <>
+         <div className="text-center mt-4">
+            Wallet Connected: {account}
+
+        </div>
+        </>
+        }
+       
         </div>
     )
 }

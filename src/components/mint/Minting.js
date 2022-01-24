@@ -3,15 +3,27 @@ import NameInput from "../misc/NameInput"
 import { mint } from "../../utils/common";
 import { useWeb3Context } from "../../hooks/useWeb3Context";
 import contract from "../../abis/contract-address.json";
+import { useContract } from "../../hooks/useContract";
+import address from "../../abis/contract-address.json";
+import abi from "../../abis/Playground.json";
+import { ethers, providers } from "ethers";
+
 
 
 export default function Minting() {
     const {account, isPageLoaded, connectWallet} = useWeb3Context();
+    const contract = useContract({
+        address: address.PlaygroundContract,
+        ABI: abi.abi,
+        signingEnabled: true,
+      });
 
     const [fields, setFields] = React.useState({
         publicKey: "",
         amount: "",
     })
+
+    const [shareholders, setShareholders] = React.useState([]);
     const handleInputChange = (e) => {
         console.log({ e, [e.target.name]:e.target.value })
         setFields({
@@ -19,75 +31,79 @@ export default function Minting() {
             [e.target.name]:e.target.value
         })
     }
-    // const [pageLoaded, setPageLoaded] = React.useState(false);
-
-    // const [metaAccount, setMetaAccount] = React.useState(null);
-    // const handleConnectWallet = (account) => {
-    //     console.log({ account })
-    //     if (account) setMetaAccount(account)
-
-    // }
 
     const handleAddShareholder = async (shareholderAddress, amount) => {
-        // const results = a
-        console.log({ fields})
-        console.log(contract.PlaygroundContract);
-        await mint(contract.PlaygroundContract,account, fields.amount  );
+        try {
+            await contract.mint(fields.publicKey, fields.amount )
+            setShareholders([
+            ...shareholders, 
+            {
+                tokenId: shareholders.length,
+                tokenOwner: fields.publicKey,
+                tokenShare: fields.amount,
+            },
+        ]);
+        setFields({...fields, amount: "", publicKey:""})
+
+        } catch (error) {
+            console.log({ error })
+            alert("Sorry there was an error with your request! Please try again")
+            
+        }
     };
 
-    // React.useEffect(() => {
-    //     const initialise = async () => {
-    //        await checkIfWalletIsConnected(handleConnectWallet)
-    //        setPageLoaded(true)
-    //     }
-    //     initialise();
+    const handleGetTokensAndShares = async () => {
+        try {
+            const tokenResponse = await contract._tokenIds();
+            const tokens = Number(tokenResponse.toString());
+            if (tokens === 0) return null;
+            let shareholders = [];
+            for (let i = 0; i < tokens ; i++) {
+                let tokenOwner = await contract.ownerOf(i)
+                let ts = await contract.shares(i)
+                let tokenShare = ts.toNumber()
+                shareholders.push({ tokenId: i, tokenOwner, tokenShare})
+                console.log({ tok: i + 1, tokenShare, tokenOwner })
+              }
+              console.log({ shareholders})
+              return setShareholders(shareholders)
+        } catch (error) {
+            console.log({ error })
+            
+        }
+    }
+    const initialise = async () => {
+        await handleGetTokensAndShares();
+        }
+        
+    React.useEffect(() => {
+       if (isPageLoaded && contract) initialise();
          
-    // },[])
-    const shareholderTest = [
-        {
-            address: "0xsos0s",
-            share: 10,
-        },
-        {
-            address: "0x2sos0s",
-            share: 30,
-        },
-    ]
+    },[isPageLoaded, contract])
+
     if (!isPageLoaded) return  <div>Loading.... </div>
     return (
         <div className="container mx-auto">
-            <div className="mt-16">
-                    {account ? <>
-                    <div>Meta Mast Connected: {account}</div>
-                    </>: <button className="btn-primary btn" onClick={connectWallet}> Connect your wallet</button> }
-                
-                
-
-            </div>
             <h1 className="text-xl mt-16"> Mint a new project </h1>
             <div className="mt-8">
                 <NameInput displayName="Project Name" name="projectName"  onChange={handleInputChange}/>
         </div>
         <hr className="mt-4"></hr>
         <h1 className="text-xl mt-16"> Mint your shareholders </h1>
+        <div className="mt-8 flex gap-6">
+        <NameInput placeholder="Public Key" value={fields.publicKey} name="publicKey"  onChange={handleInputChange}/>
+        <NameInput 
+            placeholder="Amount"  
+            value={fields.amount}  
+            name="amount"  
+            onChange={handleInputChange} 
+            buttonName="Add" 
+            buttonClick={handleAddShareholder}
+            type="number"
+            disabled={fields.publicKey.length < 2 || !fields.amount.length > 0}
+        />
+            </div>
         <div className="mt-8">
-        <div className="grid grid-cols-2 md:grid-cols-4">
-       <div className="col-span-1">
-            <label className="label">
-                <span className="label-text">Shareholder Public Key</span> 
-            </label> 
-            <input type="text" name="publicKey" onChange={handleInputChange} placeholder="Public Key" className="input input-bordered" /> 
-       </div>
-       <div>
-            <label className="label">
-                <span className="label-text">Shareholder Amount </span> 
-            </label> 
-            <input type="text" name="amount" onChange={handleInputChange} placeholder="Amount" className="input input-bordered" /> 
-       </div>
-      
-
-</div>
-<div className="mt-4"> <button className="btn btn-neutral" onClick={handleAddShareholder}> Add Shareholders </button></div>
                
                 <div className="mt-4">
                 <div className="flex flex-col">
@@ -98,6 +114,9 @@ export default function Minting() {
             <thead className="bg-white border-b">
                 <tr>
                 <th scope="col" className="text-sm font-medium text-gray-900 px-6 py-4 text-left">
+                    Token Id
+                </th>
+                <th scope="col" className="text-sm font-medium text-gray-900 px-6 py-4 text-left">
                     Shareholder Address
                 </th>
                 <th scope="col" className="text-sm font-medium text-gray-900 px-6 py-4 text-left">
@@ -106,19 +125,24 @@ export default function Minting() {
                 </tr>
             </thead>
             <tbody>
-                {shareholderTest.map((s,i ) => (
+                {shareholders && shareholders.map((s,i ) => (
                     <tr key={i} className="bg-white border-b">
-                        <td className="text-sm text-gray-900 font-light px-6 py-4 whitespace-nowrap">
-                            {s.address}
+                          <td className="text-sm text-gray-900 font-light px-6 py-4 whitespace-nowrap">
+                            {s.tokenId}
                         </td>
                         <td className="text-sm text-gray-900 font-light px-6 py-4 whitespace-nowrap">
-                    {s.share}
+                            {s.tokenOwner}
+                            {(account === s.tokenOwner) && "(Your address)"}
+                        </td>
+                        <td className="text-sm text-gray-900 font-light px-6 py-4 whitespace-nowrap">
+                    {s.tokenShare}
 
                         </td>
                     </tr>
                 ))}
             </tbody>
             </table>
+            {shareholders.length === 0 && <div className="text-center"> You currently haven't added any shareholders</div>}
         </div>
         </div>
 </div>
