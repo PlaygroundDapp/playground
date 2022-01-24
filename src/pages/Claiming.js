@@ -7,10 +7,11 @@ import address from "../abis/contract-address.json";
 export default function Claim() {
   const { account } = useWeb3Context();
   const [tokens, setTokens] = useState([]);
+  
   // TODO: get contract address from user input
   const contract = usePlayground(address.PlaygroundContract);
 
-  const claim = async (tokenId) => {
+  const claimEarnings = async (tokenId) => {
     // copied `export const claim = async (tokenId) => {` from utils.common.js
     try {
       // const contract = getContract();
@@ -21,7 +22,8 @@ export default function Claim() {
       console.log(error);
     }
   }
-  const getTokens = async (account) => {
+
+  const getTokensForUser = async () => {
     // copied `export const getTokens = async (account) => {` from utils.common.js
     const tokens = [];
     try {
@@ -37,15 +39,8 @@ export default function Claim() {
     } catch (error) {
         console.log(tokens);
     }
-    return tokens;
-  }
-
-  const claimEarnings = (tokenId) => {
-    claim(tokenId);
-  }
-
-  const getTokensForUser = async () => {
-    setTokens(await getTokens(account));
+    
+    setTokens(tokens);
     console.log(tokens);
   }
 
