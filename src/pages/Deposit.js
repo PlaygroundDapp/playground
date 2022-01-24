@@ -15,6 +15,17 @@ export default function Deposit() {
   const contract = usePlaygroundProject(address.PlaygroundContract);
 
   useEffect(() => {
+    if (!contract || !provider) {
+      return;
+    }
+    provider.once("block", () => {
+      contract.on("Deposit", () => {
+        window.alert("Successfully Deposited");
+      });
+    });
+}, [contract, provider]);
+
+  useEffect(() => {
     async function fetchETHBalance() {
       const balanceBN = await provider.getBalance(account);
       const balance = ethers.utils.formatEther(balanceBN);
