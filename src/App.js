@@ -6,9 +6,9 @@ import { Web3ContextProvider } from "./context/Web3Context";
 import Header from "./components/nav/Nav.js";
 import Container from "./components/containers/MainContainer";
 
-import Mint from "./pages/Minting";
-import Claim from "./pages/Claiming";
-import Deposit from "./pages/Depositing";
+import Mint from "./pages/Mint";
+import Claim from "./pages/Claim";
+import Deposit from "./pages/Deposit";
 
 function App() {
   return (
