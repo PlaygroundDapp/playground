@@ -23,11 +23,11 @@ export default function Mint() {
         })
     }
     
-    const handleAddShareholder = async (shareholderAddress, amount) => {
+    const handleAddShareholder = async () => {
         console.log({ fields})
         // copied `export const mint = async (address, shareholderAddress, shareAmount) => {` from utils.common.js
         try {
-            const txn = await contract.mint(shareholderAddress, amount);
+            const txn = await contract.mint(fields.publicKey, fields.amount);
             console.log({ txn });
             await txn.wait();
         } catch (error) {
