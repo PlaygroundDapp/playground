@@ -17,7 +17,7 @@ contract Playground is ERC721Enumerable, Ownable {
     uint256 currentlyIssuedShares;
     uint256 public totalDepositedAmount;
 
-    constructor() ERC721("Playground", "PG") {}
+    constructor(string memory projectTitle) ERC721(projectTitle, projectTitle) {}
 
     event Mint(address _to, uint256 _share);
     event Deposit(uint256 _amount);

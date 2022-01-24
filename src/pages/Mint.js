@@ -2,14 +2,14 @@ import React from "react";
 import NameInput from "../components/misc/NameInput"
 
 import { useWeb3Context } from "../hooks/useWeb3Context";
-import { usePlayground } from "../hooks/usePlayground";
+import { usePlaygroundProject } from "../hooks/usePlaygroundProject";
 import address from "../abis/contract-address.json";
 
 export default function Mint() {
     const {account, isPageLoaded, connectWallet} = useWeb3Context();
     
     // TODO: get contract address from user input
-    const contract = usePlayground(address.PlaygroundContract);
+    const contract = usePlaygroundProject(address.PlaygroundContract);
 
     const [fields, setFields] = React.useState({
         publicKey: "",
