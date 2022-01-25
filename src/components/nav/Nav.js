@@ -12,11 +12,11 @@ export default function NavBar(){
             name: "Mint",
             route: "/"
         }, {
-            name: "Claim",
-            route: "/claim"
-        }, {
             name: "Deposit",
             route: "/deposit"
+        }, {
+            name: "Claim",
+            route: "/claim"
         }
     ]
 
