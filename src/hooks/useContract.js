@@ -6,7 +6,7 @@ export function useContract({address, ABI, signingEnabled = false}) {
   const { provider, isActive } = useWeb3Context();
   
   return useMemo(() => {
-    if (!isActive || !provider) return null;
+    if (!isActive || !provider || !address) return null;
 
     return new Contract(
       address, 
