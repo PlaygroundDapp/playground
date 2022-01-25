@@ -1,15 +1,16 @@
+const { artifacts } = require("hardhat");
 const hre = require("hardhat");
 
 async function main() {
     const [deployer] = await hre.ethers.getSigners();
 
-    const PlaygroundContract = await hre.ethers.getContractFactory("Playground");
-    const playgroundContract = await PlaygroundContract.deploy();
+    const ProjectFactory = await hre.ethers.getContractFactory("ProjectFactory");
+    const factoryContract = await ProjectFactory.deploy();
 
-    await playgroundContract.deployed();
-    console.log("Playground Contract address:", playgroundContract.address);
+    await factoryContract.deployed();
+    console.log("Factory Contract address:", factoryContract.address);
 
-    saveFrontendFiles(playgroundContract);
+    saveFrontendFiles(factoryContract);
 
 }
 
@@ -23,14 +24,19 @@ function saveFrontendFiles(contract) {
 
     fs.writeFileSync(
         contractsDir + "/contract-address.json",
-        JSON.stringify({ PlaygroundContract: contract.address }, undefined, 2)
+        JSON.stringify({ FactoryContract: contract.address }, undefined, 2)
     );
 
-    const PlaygroundContractArtifact = artifacts.readArtifactSync("Playground");
+    const factoryContractArtifact = artifacts.readArtifactSync("ProjectFactory");
+    const playgroundArtifact = artifacts.readArtifactSync("Playground")
 
     fs.writeFileSync(
+        contractsDir + "/ProjectFactory.json",
+        JSON.stringify(factoryContractArtifact, null, 2)
+    );
+    fs.writeFileSync(
         contractsDir + "/Playground.json",
-        JSON.stringify(PlaygroundContractArtifact, null, 2)
+        JSON.stringify(playgroundArtifact, null, 2)
     );
 }
 
