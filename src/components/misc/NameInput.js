@@ -3,8 +3,8 @@ export default function NameInput({inputs = [], type= "text",disabled, displayNa
         <div className=" items-center gap-6">
                {/* {displayName && <div className="text-sm"> {displayName}</div>}  */}
                {displayName &&
-                    <label class="label">
-                        <span class="label-text">{displayName}</span>
+                    <label className="label">
+                        <span className="label-text">{displayName}</span>
                     </label> 
                }
                
