@@ -4,7 +4,6 @@ import { usePlaygroundProject } from "../hooks/usePlaygroundProject";
 import ShareTable from "../components/misc/SharesTable";
 
 export default function Claim() {
-  const getContract = usePlaygroundProject();
   const { account, provider, contractAddress } = useWeb3Context();
   const [tokens, setTokens] = useState([]);
   const [shareTotal, setShareTotal] = useState(0);
@@ -49,14 +48,14 @@ export default function Claim() {
   
     const getTokensForUser = async () => {
       const tokens = [];
-      const shareTotal = 0;
+      let total = 0;
       try {
         // const contract = getContract();
         const numberOfTokens = await contract.balanceOf(account);
         for (let i = 0; i < numberOfTokens; i++) {
           let token = await contract.tokenOfOwnerByIndex(account, i);
           let share = await contract.shares(token.toString());
-          shareTotal += share;
+          total += share;
           tokens.push({
               tokenId: token.toString(),
               tokens: share.toString()
@@ -67,7 +66,7 @@ export default function Claim() {
       }
 
       setTokens(tokens);
-      setShareTotal(shareTotal);
+      setShareTotal(total);
     }
 
     return (
