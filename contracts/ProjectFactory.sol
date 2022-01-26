@@ -5,30 +5,21 @@ import "./Playground.sol";
 
 // Playground is for creating a Project contract for our users
 contract ProjectFactory {
-
     event ProjectCreated(address _address, string _name, string _symbol);
 
     function createProject(
         string calldata name,
         string calldata symbol,
-        address[] memory shareholders,
-        uint256[] memory shareAmounts
+        address[] calldata shareholders,
+        uint256[] calldata shareAmounts
     ) external returns (address) {
-        require(shareholders.length == shareAmounts.length, "invalid param");
-
-        uint256 shareSum = 0;
-        for (uint256 i = 0; i < shareAmounts.length; i++) {
-            shareSum += shareAmounts[i];
-        }
-        require(shareSum == 100, "sum of shares should be 100");
-
-        Playground prj = new Playground(name, symbol);
-        for (uint256 i = 0; i < shareholders.length; i++) {
-            prj.mint(shareholders[i], shareAmounts[i]);
-        }
-
+        Playground prj = new Playground(
+            name,
+            symbol,
+            shareholders,
+            shareAmounts
+        );
         emit ProjectCreated(address(prj), name, symbol);
-
         return address(prj);
     }
 }

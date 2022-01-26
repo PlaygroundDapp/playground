@@ -10,54 +10,89 @@ contract Playground is ERC721Enumerable, Ownable {
     using Counters for Counters.Counter;
     using Strings for uint256;
 
-    Counters.Counter public _tokenIds;
-    mapping(uint256 => uint256) public shares; // tokenId => share amount
-    mapping(uint256 => uint256) amountsClaimed; //tokenId => amounts claimed
-    uint256 public totalShares = 100;
-    uint256 currentlyIssuedShares;
-    uint256 public totalDepositedAmount;
-
-    constructor(string memory _name, string memory _symbol) ERC721(_name, _symbol) {}
-
     event Mint(address _to, uint256 _share);
     event Deposit(uint256 _amount);
     event Claim(address shareHolder, uint256 amountClaimed);
 
+    Counters.Counter public _tokenIds;
+
+    mapping(uint256 => uint256) public shares; // tokenId => share amount
+    mapping(uint256 => uint256) private amountsClaimed; //tokenId => amounts claimed
+
+    uint256 private totalDeposit;
+
+    constructor(
+        string memory _name,
+        string memory _symbol,
+        address[] memory shareholders,
+        uint256[] memory shareAmounts
+    ) ERC721(_name, _symbol) {
+        require(
+            shareholders.length == shareAmounts.length,
+            "size of shareholder and share amount array should be the same."
+        );
+
+        uint256 shareSum = 0;
+        for (uint256 i = 0; i < shareAmounts.length; i++) {
+            require(shareAmounts[i] > 0, "Amount should be bigger than 0");
+            shareSum += shareAmounts[i];
+        }
+        require(shareSum == 100, "sum of shares should be 100");
+
+        for (uint256 i = 0; i < shareholders.length; i++) {
+            mint(shareholders[i], shareAmounts[i]);
+        }
+    }
+
+    modifier onlyShareholders() {
+        bool isShareholder = false;
+        for (uint256 i = 0; i < totalSupply(); i++) {
+            if (ownerOf(i) == msg.sender) {
+                isShareholder = true;
+                break;
+            }
+        }
+
+        require(
+            isShareholder,
+            "only shareholders are allowed to access this feature."
+        );
+        _;
+    }
+
     function mint(address _to, uint256 _share)
-        public
+        private
         onlyOwner
-        positiveAmount(_share)
         returns (uint256)
     {
-        require(currentlyIssuedShares + _share <= totalShares);
         uint256 tokenId = _tokenIds.current();
         _safeMint(_to, tokenId);
         shares[tokenId] = _share;
         _tokenIds.increment();
-        currentlyIssuedShares += _share;
         emit Mint(_to, _share);
         return tokenId;
     }
 
-    modifier positiveAmount(uint256 _amount) {
-        if (_amount == 0) {
-            revert("Amount should be bigger than 0");
-        }
-        _;
-    }
-
     function deposit() external payable {
-        totalDepositedAmount += msg.value;
+        totalDeposit += msg.value;
         emit Deposit(msg.value);
     }
 
-    function claim(uint256 _tokenId) external {
+    function totalDepositedAmount()
+        external
+        view
+        onlyShareholders
+        returns (uint256)
+    {
+        return totalDeposit;
+    }
+
+    function claim(uint256 _tokenId) external onlyShareholders {
         require(
             ownerOf(_tokenId) == msg.sender,
             "You are not the owner of this token."
         );
-        uint256 amountDeserved = (totalDepositedAmount * shares[_tokenId]) /
-            totalShares;
+        uint256 amountDeserved = (totalDeposit * shares[_tokenId]) / 100;
         uint256 amountToSend = amountDeserved - amountsClaimed[_tokenId];
 
         require(amountToSend > 0, "You dont deserve shit.");
