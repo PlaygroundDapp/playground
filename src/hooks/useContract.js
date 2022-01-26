@@ -28,7 +28,7 @@ export const useFactoryContract = () =>
 
 export const useProjectContract = (address) =>
   useContract({
-    address: address,
+    address,
     ABI: PlaygroundABI.abi,
     signingEnabled: true,
   });
