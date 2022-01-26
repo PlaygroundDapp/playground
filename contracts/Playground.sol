@@ -10,14 +10,10 @@ contract Playground is ERC721Enumerable, Ownable {
     using Counters for Counters.Counter;
     using Strings for uint256;
 
-    event Mint(address _to, uint256 _share);
-    event Deposit(uint256 _amount);
-    event Claim(address shareHolder, uint256 amountClaimed);
-
     Counters.Counter public _tokenIds;
 
     mapping(uint256 => uint256) public shares; // tokenId => share amount
-    mapping(uint256 => uint256) private amountsClaimed; //tokenId => amounts claimed
+    mapping(uint256 => uint256) amountsClaimed; //tokenId => amounts claimed
 
     uint256 private totalDeposit;
 
@@ -43,6 +39,10 @@ contract Playground is ERC721Enumerable, Ownable {
             mint(shareholders[i], shareAmounts[i]);
         }
     }
+
+    event Mint(address _to, uint256 _share);
+    event Deposit(uint256 _amount);
+    event Claim(address shareHolder, uint256 amountClaimed);
 
     modifier onlyShareholders() {
         bool isShareholder = false;
