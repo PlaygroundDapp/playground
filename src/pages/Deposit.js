@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { ethers } from "ethers";
 
 import { useWeb3Context } from "../hooks/useWeb3Context";
-import { usePlaygroundProject } from "../hooks/usePlaygroundProject";
+import { useProjectContract } from "../hooks/useContract";
 import address from "../abis/contract-address.json";
 
 export default function Deposit() {
@@ -12,7 +12,7 @@ export default function Deposit() {
   const [totalDepositedAmount, setTotalDepositedAmount] = useState("--");
 
   // TODO: get contract address from user input
-  const contract = usePlaygroundProject(address.PlaygroundContract);
+  const contract = useProjectContract(address.PlaygroundContract);
 
   useEffect(() => {
     if (!contract || !provider) {
@@ -23,7 +23,7 @@ export default function Deposit() {
         window.alert("Successfully Deposited");
       });
     });
-}, [contract, provider]);
+  }, [contract, provider]);
 
   useEffect(() => {
     async function fetchETHBalance() {
