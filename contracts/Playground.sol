@@ -61,12 +61,12 @@ contract Playground is ERC721Enumerable, Ownable {
         uint256 amountToSend = amountDeserved - amountsClaimed[_tokenId];
 
         require(amountToSend > 0, "You dont deserve shit.");
+        amountsClaimed[_tokenId] += amountToSend;
 
         (bool success, ) = msg.sender.call{value: amountToSend}("Be rich");
         if (!success) {
             revert("Claim failed");
         }
-        amountsClaimed[_tokenId] += amountToSend;
         emit Claim(msg.sender, amountToSend);
     }
 }
