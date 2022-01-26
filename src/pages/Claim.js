@@ -1,14 +1,12 @@
 import { useState, useEffect } from "react";
-
 import { useWeb3Context } from "../hooks/useWeb3Context";
 import { usePlaygroundProject } from "../hooks/usePlaygroundProject";
-import address from "../abis/contract-address.json";
-import { current } from "daisyui/colors";
+import ShareTable from "../components/misc/SharesTable";
 
 export default function Claim() {
-  const getContract = usePlaygroundProject();
   const { account, provider, contractAddress } = useWeb3Context();
   const [tokens, setTokens] = useState([]);
+  const [shareTotal, setShareTotal] = useState(0);
   const [currentContractAddress, setCurrentContractAddress] = useState(contractAddress.address);
   
   // TODO: get contract address from user input
@@ -38,7 +36,6 @@ export default function Claim() {
 
 
     const claimEarnings = async (tokenId) => {
-      // copied `export const claim = async (tokenId) => {` from utils.common.js
       try {
         // const contract = getContract();
         const txn = await contract.claim(tokenId);
@@ -50,59 +47,42 @@ export default function Claim() {
     }
   
     const getTokensForUser = async () => {
-      // copied `export const getTokens = async (account) => {` from utils.common.js
       const tokens = [];
+      let total = 0;
       try {
-          // const contract = getContract();
-          for (let i = 0; true; i++) {
-              let token = await contract.tokenOfOwnerByIndex(account, i);
-              let share = await contract.shares(token.toString());
-              tokens.push({
-                  tokenId: token.toString(),
-                  share: share.toString()
-              });
-          }
+        // const contract = getContract();
+        const numberOfTokens = await contract.balanceOf(account);
+        for (let i = 0; i < numberOfTokens; i++) {
+          let token = await contract.tokenOfOwnerByIndex(account, i);
+          let share = await contract.shares(token.toString());
+          total += share;
+          tokens.push({
+              tokenId: token.toString(),
+              tokens: share.toString()
+          });
+        }
       } catch (error) {
           console.log(tokens);
       }
-      
+
       setTokens(tokens);
-      console.log(tokens);
+      setShareTotal(total);
     }
 
     return (
       <div>
-        <div>
-          <button className="btn-primary btn" onClick={() => getTokensForUser()}> Get Tokens</button>
+        <div className="mb-8">
+          <button className="btn btn-primary w-full rounded-full" onClick={() => getTokensForUser()}> Get Tokens</button>
         </div>
 
         { tokens.length > 0 && (
-          <div>
-            <h2 className="mt-8">Tokens</h2>
-
-            <table>
-              <tr>
-                <th scope="col" className="px-6">Token Id</th>
-                <th scope="col" className="px-6">Share</th>
-                <th scope="col" className="px-6">Claim</th>
-              </tr>
-              {tokens.map((token, idx) => (
-                <tr key={idx} className="mt-4">
-                  <td className="px-6 py-4">{token.tokenId}</td>
-                  <td className="px-6 py-4">{token.share}%</td>
-                  <td className="px-6 py-4"><button className="btn-primary btn" onClick={() => claimEarnings(token.tokenId)}> Claim</button></td>
-                </tr> 
-              ))}
-            </table>
-          </div>
+          <ShareTable shares={tokens} account={account} contractLoaded={true} shareTotal={shareTotal} claim={claimEarnings}/>
         )}
-        <div>
-
-        </div>
-
       </div>
     )
   }
+
+
 
   return (
     <div className="container mx-auto">  
@@ -114,7 +94,6 @@ export default function Claim() {
         </div>
 
         <ClaimEarnings address={currentContractAddress} />
-
     </div>
   )
 }
