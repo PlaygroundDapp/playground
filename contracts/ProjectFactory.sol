@@ -3,7 +3,6 @@ pragma solidity ^0.8.0;
 
 import "./Playground.sol";
 
-// Playground is for creating a Project contract for our users
 contract ProjectFactory {
     event ProjectCreated(address _address, string _name, string _symbol);
 
