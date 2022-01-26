@@ -49,7 +49,6 @@ export default function ShareTable({ shares, account, contractLoaded, shareTotal
             <td className="text-sm text-gray-900 font-light px-6 py-4 whitespace-nowrap text-right">
               {s.tokenShare}
             </td>
-
             { !claim && (
               <td className="text-sm text-gray-900 font-light px-6 py-4 whitespace-nowrap">
                 <button className={`btn btn-circle btn-sm ${contractLoaded && "hidden"}`} onClick={() => deleteShareholder(i)}>
@@ -69,6 +68,7 @@ export default function ShareTable({ shares, account, contractLoaded, shareTotal
         ))}
         <tr className="bg-white border-b">
           <td className="text-sm text-gray-900 font-light px-6 py-4 whitespace-nowrap" />
+          
           { !claim && (
             <td className="text-sm text-gray-900 font-light px-6 py-4 whitespace-nowrap" />
           )}
