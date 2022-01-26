@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useWeb3Context } from "../hooks/useWeb3Context";
-import { usePlaygroundProject } from "../hooks/usePlaygroundProject";
+import { useProjectContract } from "../hooks/useContract";
 import ShareTable from "../components/misc/SharesTable";
 
 export default function Claim() {
@@ -28,7 +28,7 @@ export default function Claim() {
   }
 
   const ClaimEarnings = (props) => {
-    let contract = usePlaygroundProject(props.address);
+    let contract = useProjectContract(props.address);
 
     if (!contract) {
       return null;

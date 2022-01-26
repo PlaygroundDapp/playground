@@ -1,11 +1,8 @@
 import React, {useEffect} from "react";
 import NameInput from "../components/misc/NameInput"
 import SharesTable from "../components/misc/SharesTable"
-import { useContract } from "../hooks/useContract";
+import { useFactoryContract, useProjectContract } from "../hooks/useContract";
 import { useWeb3Context } from "../hooks/useWeb3Context";
-import address from "../abis/contract-address.json";
-import projectFactoryAbi from "../abis/ProjectFactory.json"
-import playgroundAbi from "../abis/Playground.json"
 import { useNavigate } from 'react-router-dom';
 
 
@@ -19,8 +16,8 @@ export default function Mint() {
     
     // TODO: get contract address from user input
     // const contract = usePlaygroundProject();
-    const contract = useContract({ address: address.FactoryContract, ABI: projectFactoryAbi.abi, signingEnabled: true })
-    const playgroundContract = useContract({ address: contractAddress.address, ABI: playgroundAbi.abi, signingEnabled: true })
+    const contract = useFactoryContract();
+    const playgroundContract = useProjectContract(contractAddress.address);
 
 
     const createProject = async () => {
