@@ -6,8 +6,8 @@ import { useProjectContract } from "../hooks/useContract";
 import SharesTable from "../components/misc/SharesTable";
 
 export default function Deposit() {
-  const { provider, contractAddress, setContractAddress } = useWeb3Context();
-  const contract = useProjectContract(contractAddress.address);
+  const { provider, contractMetadata, setContractMetadata } = useWeb3Context();
+  const contract = useProjectContract(contractMetadata.address);
   const [shareholders, setShareholders] = useState([]);
   const [shareTotal, setShareTotal] = useState();
   const [projectName, setProjectName] = useState();
@@ -53,7 +53,6 @@ export default function Deposit() {
       setProjectSymbol(await contract.symbol());
       setProjectName(await contract.name())
     })();
-
   }, [contract]);
 
   async function deposit() {
@@ -66,8 +65,9 @@ export default function Deposit() {
   }
 
   const handleAddressChange = (e) => {
-    const input = e.target.value;
-    setContractAddress(input && input.length ? input : null);
+    setContractMetadata({
+      address: e.target.value
+    })
   };
 
   return (
@@ -92,7 +92,7 @@ export default function Deposit() {
           type="text"
           placeholder="Contract address"
           className="input input-bordered w-full"
-          value={contractAddress}
+          value={contractMetadata.address}
           onChange={handleAddressChange}
         />
         }

@@ -2,13 +2,12 @@ import { createContext, useEffect, useMemo, useState } from "react";
 import { ethers } from "ethers";
 import queryString from "query-string";
 
-
 export const Web3Context = createContext({
   provider: null,
   account: null,
   isActive: false,
   isPageLoaded: false,
-  contractAddress: { address: "", projectName: "", symbol: "" },
+  contractMetadata: { address: "", projectName: "", symbol: "" },
   connectWallet: () => {},
 });
 
@@ -17,7 +16,7 @@ export function Web3ContextProvider({ children }) {
   const [account, setAccount] = useState(null);
   const [isActive, setIsActive] = useState(false);
   const [isPageLoaded, setIsPageLoaded] = useState(false);
-  const [contractAddress, setContractAddress] = useState("");
+  const [contractMetadata, setContractMetadata] = useState({});
   const location = window.location;
 
   const parsed = queryString.parse(location.search);
@@ -52,8 +51,8 @@ export function Web3ContextProvider({ children }) {
       account,
       isActive,
       isPageLoaded,
-      contractAddress,
-      setContractAddress,
+      contractMetadata,
+      setContractMetadata,
       connectWallet: async () => {
         const { ethereum } = window;
 
@@ -63,7 +62,7 @@ export function Web3ContextProvider({ children }) {
         checkIfWalletIsConnected();
       },
     }),
-    [provider, account, isActive, isPageLoaded, contractAddress]
+    [provider, account, isActive, isPageLoaded, contractMetadata]
   );
 
   return (

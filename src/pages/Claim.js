@@ -5,10 +5,10 @@ import { useProjectContract } from "../hooks/useContract";
 import ShareTable from "../components/misc/SharesTable";
 
 export default function Claim() {
-  const { account, provider, contractAddress } = useWeb3Context();
+  const { account, provider, contractMetadata } = useWeb3Context();
   const [tokens, setTokens] = useState([]);
   const [shareTotal, setShareTotal] = useState(0);
-  const [currentContractAddress, setCurrentContractAddress] = useState(contractAddress.address);
+  const [currentContractAddress, setCurrentContractAddress] = useState(contractMetadata.address);
   
   // TODO: get contract address from user input
   let contract;
