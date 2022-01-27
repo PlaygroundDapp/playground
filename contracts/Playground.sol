@@ -104,4 +104,28 @@ contract Playground is ERC721Enumerable, Ownable {
         }
         emit Claim(msg.sender, amountToSend);
     }
+
+    function splitToken(
+        address _to,
+        uint256 _tokenId,
+        uint256 _newShare
+    ) external returns (uint256) {
+        require(ownerOf(_tokenId) == msg.sender, "You do not own this token");
+        require(
+            shares[_tokenId] > _newShare,
+            "New shares must be less than your available share"
+        );
+        require(_newShare > 0, "Shares must be greater than 0");
+        uint256 tokenId = _tokenIds.current();
+        _safeMint(_to, tokenId);
+        shares[tokenId] = _newShare;
+        _tokenIds.increment();
+        emit Mint(_to, _newShare);
+        return tokenId;
+        // test with i token then split into 2
+        // check current supply to make sure its 1
+        // check current token id to equal 1
+        //  check new token to equal 2
+        // once minted check supply to make sure it equals 2
+    }
 }
