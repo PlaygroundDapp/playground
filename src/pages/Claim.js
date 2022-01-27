@@ -92,7 +92,7 @@ export default function Claim() {
 
 
         <div className="mt-8 mb-4">
-          <input type="text" placeholder="Contract address" className="input input-bordered w-full" value={currentContractAddress} onChange={handleAddressChange}/>
+          Enter contract address: <input type="text" placeholder="Contract address" className="input input-bordered w-24" value={currentContractAddress} onChange={handleAddressChange}/>
         </div>
 
         <ClaimEarnings address={currentContractAddress} />
