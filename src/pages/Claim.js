@@ -1,10 +1,6 @@
 import { useState, useEffect } from "react";
 import { useWeb3Context } from "../hooks/useWeb3Context";
-<<<<<<< HEAD
-import { usePlaygroundProject } from "../hooks/usePlaygroundProject";
-=======
 import { useProjectContract } from "../hooks/useContract";
->>>>>>> master
 import ShareTable from "../components/misc/SharesTable";
 
 export default function Claim() {
