@@ -44,14 +44,6 @@ describe("Playground Contract", async function () {
     await playground.deployed();
   });
 
-  const niceMint = async function () {
-    for (const shareholder of shareholders) {
-      await playground
-        .connect(owner)
-        .mint(shareholder.address, shareholder.share);
-    }
-  };
-
   const niceDeposit = async function (amount) {
     await playground.connect(owner).setApprovalForAll(playground.address, true);
     await playground.connect(owner).deposit({ value: amount });
@@ -74,8 +66,6 @@ describe("Playground Contract", async function () {
 
   describe("mint", function () {
     it("can mint NFTs", async function () {
-      await niceMint();
-
       for (const shareholder of shareholders) {
         await expect(await playground.balanceOf(shareholder.address)).to.equal(
           1
@@ -106,13 +96,7 @@ describe("Playground Contract", async function () {
         }
       }
 
-      expect(totalShares).to.equal(await playground.totalShares());
-    });
-
-    it("cannot mint with 0 share", async function () {
-      await expect(
-        playground.connect(owner).mint(shareholders[0].address, 0)
-      ).to.be.revertedWith("Amount should be bigger than 0");
+      expect(totalShares).to.equal(100);
     });
   });
 
@@ -144,7 +128,6 @@ describe("Playground Contract", async function () {
 
   describe("claim", function () {
     it("can claim deposited share", async function () {
-      await niceMint();
       await niceDeposit(ethers.utils.parseEther("100"));
 
       const snapshot = await getSnapshot();
