@@ -14,6 +14,17 @@ export default function Deposit() {
   const [shareholders, setShareholders] = useState([]);
 
   useEffect(() => {
+    if (!contract || !provider) {
+      return;
+    }
+    provider.once("block", () => {
+      contract.on("Deposit", () => {
+        window.alert("Successfully Deposited");
+      });
+    });
+  }, [contract, provider]);
+
+  useEffect(() => {
     if (!contract) return;
 
     const fetchShareholderInfo = async () => {

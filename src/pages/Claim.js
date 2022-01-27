@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useWeb3Context } from "../hooks/useWeb3Context";
 import { useProjectContract } from "../hooks/useContract";
+
 import ShareTable from "../components/misc/SharesTable";
 
 export default function Claim() {
@@ -55,10 +56,11 @@ export default function Claim() {
         for (let i = 0; i < numberOfTokens; i++) {
           let token = await contract.tokenOfOwnerByIndex(account, i);
           let share = await contract.shares(token.toString());
-          total += share;
+          total += parseInt(share);
           tokens.push({
               tokenId: token.toString(),
-              tokens: share.toString()
+              tokenShare: share.toString()
+
           });
         }
       } catch (error) {

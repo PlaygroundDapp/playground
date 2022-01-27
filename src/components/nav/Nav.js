@@ -1,10 +1,17 @@
 import React from "react";
 import {Link, useLocation} from "react-router-dom"
 import { useWeb3Context } from "../../hooks/useWeb3Context";
+import queryString from "query-string";
+import { useNavigate  } from "react-router-dom";
+
 // import { checkIfWalletIsConnected, connectWallet } from "../../utils/common"
 
 export default function NavBar(){
+//   const location = window.location;
+
     const location = useLocation();
+    const parsed = queryString.parse(location.search);
+    const navigate = useNavigate();
     // const [metaAccount, setMetaAccount] = React.useState(null);
     const { isActive, connectWallet, account } = useWeb3Context();
     const routes = [
@@ -41,7 +48,7 @@ export default function NavBar(){
                                 "border-b-2 border-primary text-primary"
                             } py-2 hover:text-primary`}
                         >
-                            <Link to={route.route}>
+                            <Link to={`${route.route}${parsed.contractAddress? `?contractAddress=${parsed.contractAddress }`: "" }`}>
                             {route.name} 
                                 {/* <a className=""> {route.name} </a> */}
                             </Link>
