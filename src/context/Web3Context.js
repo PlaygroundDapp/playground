@@ -39,7 +39,7 @@ export function Web3ContextProvider({ children }) {
   }, []);
 
   useEffect(() => {
-    if (parsed.contractAddress) setContractAddress({
+    if (parsed.contractAddress) setContractMetadata({
       address: parsed.contractAddress
     })
 
