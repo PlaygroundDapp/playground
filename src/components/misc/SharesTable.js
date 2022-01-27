@@ -1,4 +1,4 @@
-export default function ShareTable({ shares, account, contractLoaded, shareTotal, deleteShareholder=false, claim=false}) {
+export default function ShareTable({ shares, account, contractLoaded, shareTotal, deleteShareholder=false, totalClaimed=0, claim=false}) {
   return (
     <div className="overflow-x-auto sm:-mx-6 lg:-mx-8">
       <div className="py-2 inline-block min-w-full sm:px-6 lg:px-8">
@@ -18,19 +18,25 @@ export default function ShareTable({ shares, account, contractLoaded, shareTotal
                       )
                     }
 
-                    <th scope="col" className="text-sm font-medium text-gray-900 px-6 py-4 text-left text-right">
+                    <th scope="col" className="text-sm font-medium text-gray-900 px-6 py-4 text-right">
                         Share Percent
                     </th>
                     
                     {
-                      claim && (
-                        <th scope="col" className="text-sm font-medium text-gray-900 px-6 py-4 text-left">
-                          Claim
-                        </th>
-                      ) || (
+                      !claim && (
                         <th scope="col" className="text-sm font-medium text-gray-900 px-6 py-4 text-left">
                       
                         </th>
+                      ) || (
+                        <>
+                        <th scope="col" className="text-sm font-medium text-gray-900 px-6 py-4 text-right">
+                          Amount Claimed
+                        </th>
+
+                        <th scope="col" className="text-sm font-medium text-gray-900 px-6 py-4 text-right">
+                          Claim
+                        </th>
+                        </>
                       )
                     }
                 </tr>
@@ -49,10 +55,10 @@ export default function ShareTable({ shares, account, contractLoaded, shareTotal
                     </td>
                   )}
 
-
                   <td className="text-sm text-gray-900 font-light px-6 py-4 whitespace-nowrap text-right">
-                    {s.tokenShare}
+                    {s.tokenShare}%
                   </td>
+
                   { !claim && (
                     <td className="text-sm text-gray-900 font-light px-6 py-4 whitespace-nowrap">
                       <button className={`btn btn-circle btn-sm ${contractLoaded && "hidden"}`} onClick={() => deleteShareholder(i)}>
@@ -61,15 +67,15 @@ export default function ShareTable({ shares, account, contractLoaded, shareTotal
                         </svg>
                       </button> 
                     </td>
+                  ) || (
+                    <>
+                      <td className="px-6 py-4 text-gray-900 font-light whitespace-nowrap text-right">{s.amountClaimed}</td>
+                      <td className="px-6 py-4"><button className="btn-primary btn float-right" onClick={() => claim(s.tokenId)}> Claim</button></td>
+                    </>
                   )}
-
-                  {
-                    claim && (
-                      <td className="px-6 py-4"><button className="btn-primary btn" onClick={() => claim(s.tokenId)}> Claim</button></td>
-                    )
-                  }
                 </tr>
               ))}
+
               <tr className="bg-white border-b">
                 <td className="text-sm text-gray-900 font-light px-6 py-4 whitespace-nowrap" />
                 
@@ -78,8 +84,16 @@ export default function ShareTable({ shares, account, contractLoaded, shareTotal
                 )}
                 
                 <td className="text-sm text-gray-900 font-light px-6 py-4 whitespace-nowrap text-right">
-                    Total: {shareTotal}
+                    Total: {shareTotal}%
                 </td>
+
+                {
+                  claim && (
+                    <td className="text-sm text-gray-900 font-light px-6 py-4 whitespace-nowrap text-right">
+                    Total Claimed: {totalClaimed}
+                    </td>
+                  )
+                }
                 <td className="text-sm text-gray-900 font-light px-6 py-4 whitespace-nowrap">
 
                 </td>

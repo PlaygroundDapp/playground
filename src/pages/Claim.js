@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { ethers } from "ethers";
 import { useWeb3Context } from "../hooks/useWeb3Context";
 import { useProjectContract } from "../hooks/useContract";
 import SharesTable from "../components/misc/SharesTable";
@@ -11,6 +12,8 @@ export default function Claim() {
   const [currentContractAddress, setCurrentContractAddress] = useState(contractMetadata.address);
   const [projectName, setProjectName] = useState();
   const [projectSymbol, setProjectSymbol] = useState();
+  const [projectRevenue, setProjectRevenue] = useState();
+  const [totalClaimed, setTotalClaimed] = useState();
 
   // TODO: get contract address from user input
   let contract;
@@ -31,6 +34,7 @@ export default function Claim() {
   }
 
   const ClaimEarnings = (props) => {
+
     let contract = useProjectContract(props.address);
 
     if (!contract) {
@@ -52,27 +56,34 @@ export default function Claim() {
     const getTokensForUser = async () => {
       const tokens = [];
       let total = 0;
+      let totalClaimed = 0;
       try {
         // const contract = getContract();
         const numberOfTokens = await contract.balanceOf(account);
         for (let i = 0; i < numberOfTokens; i++) {
           let token = await contract.tokenOfOwnerByIndex(account, i);
-          let share = await contract.shares(token.toString());
+          const tokenId = token.toString();
+          let share = await contract.shares(tokenId);
+          let amountClaimed = ethers.utils.formatEther(await contract.claimedAmount(tokenId));
           total += parseInt(share);
+          totalClaimed += amountClaimed;
           tokens.push({
-              tokenId: token.toString(),
-              tokenShare: share.toString()
-
+            tokenId: tokenId,
+            tokenShare: share.toString(),
+            amountClaimed: amountClaimed
           });
         }
       } catch (error) {
-          console.log(tokens);
+        console.log(error)
+        console.log(tokens);
       }
 
       setProjectSymbol(await contract.symbol());
       setProjectName(await contract.name())
+      setProjectRevenue(ethers.utils.formatEther(await contract.totalDepositedAmount()));
       setTokens(tokens);
       setShareTotal(total);
+      setTotalClaimed(totalClaimed);
     }
 
     return (
@@ -82,7 +93,7 @@ export default function Claim() {
         </div>
 
         { projectName && (
-          <div className="flex gap-6"><ProjectDetails projectName={projectName} projectSymbol={projectSymbol} /></div>
+          <div className="flex gap-6"><ProjectDetails projectName={projectName} projectSymbol={projectSymbol} projectRevenue={projectRevenue} /></div>
         )}
 
         { tokens.length > 0 && (
