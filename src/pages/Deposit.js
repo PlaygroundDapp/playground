@@ -6,12 +6,12 @@ import { useProjectContract } from "../hooks/useContract";
 import SharesTable from "../components/misc/SharesTable";
 
 export default function Deposit() {
-  const { provider, contractAddress } = useWeb3Context();
-  const [currentContractAddress, setCurrentContractAddress] = useState(
-    contractAddress.address
-  );
-  const contract = useProjectContract(currentContractAddress);
+  const { provider, contractAddress, setContractAddress } = useWeb3Context();
+  const contract = useProjectContract(contractAddress.address);
   const [shareholders, setShareholders] = useState([]);
+  const [shareTotal, setShareTotal] = useState();
+  const [projectName, setProjectName] = useState();
+  const [projectSymbol, setProjectSymbol] = useState();
 
   useEffect(() => {
     if (!contract || !provider) {
@@ -27,7 +27,8 @@ export default function Deposit() {
   useEffect(() => {
     if (!contract) return;
 
-    const fetchShareholderInfo = async () => {
+    (async() => {
+
       const shareholders = [];
       try {
         const totalSupply = await contract.totalSupply();
@@ -45,10 +46,14 @@ export default function Deposit() {
         console.log(error);
       }
 
-      setShareholders(shareholders);
-    };
+      const shareTotal = shareholders.map(s => s.tokenShare).reduce((a, b) => parseInt(a) + parseInt(b));
 
-    fetchShareholderInfo();
+      setShareholders(shareholders);
+      setShareTotal(shareTotal);
+      setProjectSymbol(await contract.symbol());
+      setProjectName(await contract.name())
+    })();
+
   }, [contract]);
 
   async function deposit() {
@@ -62,13 +67,27 @@ export default function Deposit() {
 
   const handleAddressChange = (e) => {
     const input = e.target.value;
-    setCurrentContractAddress(input && input.length ? input : null);
+    setContractAddress(input && input.length ? input : null);
   };
 
   return (
     <div className="container mx-auto">
       <h1 className="text-4xl mt-16"> Deposit</h1>
-      <div className="mt-8 mb-4">
+      <div className="mt-8 mb-4 flex gap-6">
+        {contract ?
+        <>
+        <div>
+           <p className="text-xs opacity-50">Project Name</p>
+           <p>{projectName}</p>
+
+       </div>
+       <div>
+           <p className="text-xs opacity-50">Symbol</p>
+           <p>{projectSymbol}</p>
+       </div>
+       
+       </>
+        :
         <input
           type="text"
           placeholder="Contract address"
@@ -76,6 +95,8 @@ export default function Deposit() {
           value={contractAddress}
           onChange={handleAddressChange}
         />
+        }
+        
       </div>
       <div className="border-2 p-6 mt-6">
         <h1 className="text-l font-bold"> Shareholders </h1>
@@ -85,6 +106,7 @@ export default function Deposit() {
               <SharesTable
                 shares={shareholders}
                 contractLoaded={contract !== null}
+                shareTotal={shareTotal}
               />
             </div>
           </div>
