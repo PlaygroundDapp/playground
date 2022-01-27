@@ -38,10 +38,8 @@ describe("Project Factory Contract", async function () {
         expect(await playground.name()).to.equal('To The Moon');
         expect(await playground.symbol()).to.equal('TTM');
 
-        expect(playground).to.have.deep.property('mint');
         expect(playground).to.have.deep.property('deposit');
         expect(playground).to.have.deep.property('claim');
-        expect(await playground.totalShares()).to.equal(100);
     })
   });
 });
