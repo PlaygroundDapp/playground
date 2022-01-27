@@ -1,6 +1,7 @@
 import React, {useEffect} from "react";
 import NameInput from "../components/misc/NameInput"
 import SharesTable from "../components/misc/SharesTable"
+import ProjectDetails from "../components/misc/ProjectDetails"
 import { useFactoryContract, useProjectContract } from "../hooks/useContract";
 import { useWeb3Context } from "../hooks/useWeb3Context";
 import { useNavigate } from 'react-router-dom';
@@ -170,38 +171,20 @@ export default function Mint() {
             <div className="mt-8 flex gap-6">
                 {!contractLoaded ? 
                 <>
-                 <NameInput displayName="Project Name" name="projectName"   value={fields.projectName}     placeholder={`Eg. "Project Makeover"`}  onChange={handleInputChange}/>
+                <NameInput displayName="Project Name" name="projectName"   value={fields.projectName}     placeholder={`Eg. "Project Makeover"`}  onChange={handleInputChange}/>
                 <NameInput displayName="Symbol" name="symbol"  value={fields.symbol}   placeholder={`Eg. "PM"`}  onChange={handleInputChange}/>
-           
                 </>
                 :
-                <>
-                 <div>
-                    <p className="text-xs opacity-50">Project Name</p>
-                    <p>{fields.projectName}</p>
-
-                </div>
-                <div>
-                    <p className="text-xs opacity-50">Symbol</p>
-                    <p>{fields.symbol}</p>
-
-                </div>
-                
-                </>
+                <ProjectDetails projectName={fields.projectName} projectSymbol={fields.symbol} />
             }
                 </div>
            
             <div className="border-2 p-6 mt-6">
                 <h1 className="text-l font-bold"> Shareholders </h1>
-                <div className="overflow-x-auto sm:-mx-6 lg:-mx-8">
-                    <div className="py-2 inline-block min-w-full sm:px-6 lg:px-8">
-                        <div className="overflow-hidden">
-                            <SharesTable shares={shareholders} account={account} contractLoaded={contractLoaded} deleteShareholder={deleteShareholder} shareTotal={shareTotal} />
-                        
-                            {shareholders.length === 0 && <div className="text-center mt-2 text-sm"> You currently haven't added any shareholders. Add some below.</div>}
-                        </div>
-                    </div>
-                </div>
+                <SharesTable shares={shareholders} account={account} contractLoaded={contractLoaded} deleteShareholder={deleteShareholder} shareTotal={shareTotal} />
+            
+                {shareholders.length === 0 && <div className="text-center mt-2 text-sm"> You currently haven't added any shareholders. Add some below.</div>}
+
                 {shareTotal > 100 && (
                     <div className="flex text-sm text-red-600">
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">

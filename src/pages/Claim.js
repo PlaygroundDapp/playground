@@ -1,15 +1,17 @@
 import { useState, useEffect } from "react";
 import { useWeb3Context } from "../hooks/useWeb3Context";
 import { useProjectContract } from "../hooks/useContract";
-
-import ShareTable from "../components/misc/SharesTable";
+import SharesTable from "../components/misc/SharesTable";
+import ProjectDetails from "../components/misc/ProjectDetails";
 
 export default function Claim() {
   const { account, provider, contractMetadata } = useWeb3Context();
   const [tokens, setTokens] = useState([]);
   const [shareTotal, setShareTotal] = useState(0);
   const [currentContractAddress, setCurrentContractAddress] = useState(contractMetadata.address);
-  
+  const [projectName, setProjectName] = useState();
+  const [projectSymbol, setProjectSymbol] = useState();
+
   // TODO: get contract address from user input
   let contract;
 
@@ -22,7 +24,7 @@ export default function Claim() {
         window.alert("Successfully Claimed");
       });
     });
-}, [contract, provider]);
+  }, [contract, provider]);
 
   const handleAddressChange = (e) => {
     setCurrentContractAddress(e.target.value);
@@ -67,6 +69,8 @@ export default function Claim() {
           console.log(tokens);
       }
 
+      setProjectSymbol(await contract.symbol());
+      setProjectName(await contract.name())
       setTokens(tokens);
       setShareTotal(total);
     }
@@ -77,8 +81,15 @@ export default function Claim() {
           <button className="btn btn-primary w-full rounded-full" onClick={() => getTokensForUser()}> Get Tokens</button>
         </div>
 
+        { projectName && (
+          <div className="flex gap-6"><ProjectDetails projectName={projectName} projectSymbol={projectSymbol} /></div>
+        )}
+
         { tokens.length > 0 && (
-          <ShareTable shares={tokens} account={account} contractLoaded={true} shareTotal={shareTotal} claim={claimEarnings}/>
+          <div className="border-2 p-6 mt-6">
+            <h1 className="text-l font-bold"> Tokens </h1>
+            <SharesTable shares={tokens} account={account} contractLoaded={true} shareTotal={shareTotal} claim={claimEarnings}/>
+          </div>
         )}
       </div>
     )
@@ -88,14 +99,13 @@ export default function Claim() {
 
   return (
     <div className="container mx-auto">  
-        <h1 className="text-xl mt-16"> Claim your earnings</h1>
+      <h1 className="text-4xl mt-16">Claim</h1>
 
+      <div className="mt-8 mb-4">
+        <input type="text" placeholder="Contract address" className="input input-bordered w-full" value={currentContractAddress} onChange={handleAddressChange}/>
+      </div>
 
-        <div className="mt-8 mb-4">
-          Enter contract address: <input type="text" placeholder="Contract address" className="input input-bordered w-24" value={currentContractAddress} onChange={handleAddressChange}/>
-        </div>
-
-        <ClaimEarnings address={currentContractAddress} />
+      <ClaimEarnings address={currentContractAddress} />
     </div>
   )
 }

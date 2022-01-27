@@ -4,6 +4,7 @@ import { ethers } from "ethers";
 import { useWeb3Context } from "../hooks/useWeb3Context";
 import { useProjectContract } from "../hooks/useContract";
 import SharesTable from "../components/misc/SharesTable";
+import ProjectDetails from "../components/misc/ProjectDetails";
 
 export default function Deposit() {
   const { provider, contractMetadata, setContractMetadata } = useWeb3Context();
@@ -75,42 +76,25 @@ export default function Deposit() {
       <h1 className="text-4xl mt-16"> Deposit</h1>
       <div className="mt-8 mb-4 flex gap-6">
         {contract ?
-        <>
-        <div>
-           <p className="text-xs opacity-50">Project Name</p>
-           <p>{projectName}</p>
-
-       </div>
-       <div>
-           <p className="text-xs opacity-50">Symbol</p>
-           <p>{projectSymbol}</p>
-       </div>
-       
-       </>
+          <ProjectDetails projectName={projectName} projectSymbol={projectSymbol} />
         :
-        <input
-          type="text"
-          placeholder="Contract address"
-          className="input input-bordered w-full"
-          value={contractMetadata.address}
-          onChange={handleAddressChange}
-        />
+          <input
+            type="text"
+            placeholder="Contract address"
+            className="input input-bordered w-full"
+            value={contractMetadata.address}
+            onChange={handleAddressChange}
+          />
         }
         
       </div>
       <div className="border-2 p-6 mt-6">
         <h1 className="text-l font-bold"> Shareholders </h1>
-        <div className="overflow-x-auto sm:-mx-6 lg:-mx-8">
-          <div className="py-2 inline-block min-w-full sm:px-6 lg:px-8">
-            <div className="overflow-hidden">
-              <SharesTable
-                shares={shareholders}
-                contractLoaded={contract !== null}
-                shareTotal={shareTotal}
-              />
-            </div>
-          </div>
-        </div>
+        <SharesTable
+          shares={shareholders}
+          contractLoaded={contract !== null}
+          shareTotal={shareTotal}
+        />
       </div>
       <div className="mt-8 mb-4">
         <button className="btn-primary btn" onClick={deposit}>
