@@ -9,7 +9,7 @@ import { useNavigate } from 'react-router-dom';
 
 export default function Mint() {
     const navigate = useNavigate();
-    const {account, isPageLoaded, provider, contractAddress, setContractAddress} = useWeb3Context();
+    const {account, isPageLoaded, provider, contractMetadata, setContractMetadata} = useWeb3Context();
     const [shareTotal, setShareTotal] = React.useState(0)
     const [contractLoaded, setContractLoaded] = React.useState(false)
     // const [contractAddress, setContractAddress] = React.useState(null)
@@ -17,7 +17,7 @@ export default function Mint() {
     // TODO: get contract address from user input
     // const contract = usePlaygroundProject();
     const contract = useFactoryContract();
-    const playgroundContract = useProjectContract(contractAddress.address);
+    const playgroundContract = useProjectContract(contractMetadata.address);
 
 
     const createProject = async () => {
@@ -31,7 +31,7 @@ export default function Mint() {
            const event = res.events.filter((e) => e.event === "ProjectCreated")
            const args = event[0].args
            console.log({ event, args })
-           setContractAddress({
+           setContractMetadata({
                address: args[0],
                projectName: args[1],
                symbol: args[2]
@@ -149,7 +149,7 @@ export default function Mint() {
    }
 
     const initialise = () => {
-        if(contractAddress.address) handleGetTokensAndShares()
+        if(contractMetadata.address) handleGetTokensAndShares()
     }
     useEffect(() => {
             if (!contract || !provider) {
@@ -161,7 +161,7 @@ export default function Mint() {
                   window.alert("Successfully Minted");
               });
             });
-        }, [contract, provider, contractAddress.address]);
+        }, [contract, provider, contractMetadata.address]);
     if (!isPageLoaded) return  <div>Loading.... </div>
     return (
         <div className="container mx-auto p-4">

@@ -1,13 +1,14 @@
 import { useState, useEffect } from "react";
 import { useWeb3Context } from "../hooks/useWeb3Context";
 import { useProjectContract } from "../hooks/useContract";
+
 import ShareTable from "../components/misc/SharesTable";
 
 export default function Claim() {
-  const { account, provider, contractAddress } = useWeb3Context();
+  const { account, provider, contractMetadata } = useWeb3Context();
   const [tokens, setTokens] = useState([]);
   const [shareTotal, setShareTotal] = useState(0);
-  const [currentContractAddress, setCurrentContractAddress] = useState(contractAddress.address);
+  const [currentContractAddress, setCurrentContractAddress] = useState(contractMetadata.address);
   
   // TODO: get contract address from user input
   let contract;
@@ -55,10 +56,11 @@ export default function Claim() {
         for (let i = 0; i < numberOfTokens; i++) {
           let token = await contract.tokenOfOwnerByIndex(account, i);
           let share = await contract.shares(token.toString());
-          total += share;
+          total += parseInt(share);
           tokens.push({
               tokenId: token.toString(),
-              tokens: share.toString()
+              tokenShare: share.toString()
+
           });
         }
       } catch (error) {
@@ -90,7 +92,7 @@ export default function Claim() {
 
 
         <div className="mt-8 mb-4">
-          <input type="text" placeholder="Contract address" className="input input-bordered w-full" value={currentContractAddress} onChange={handleAddressChange}/>
+          Enter contract address: <input type="text" placeholder="Contract address" className="input input-bordered w-24" value={currentContractAddress} onChange={handleAddressChange}/>
         </div>
 
         <ClaimEarnings address={currentContractAddress} />
