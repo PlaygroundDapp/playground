@@ -1,11 +1,18 @@
 const { expect } = require("chai");
 const { ethers } = require("hardhat");
 
-describe("Playground Contract", async function () {
+describe("Playground Contract", function () {
   let playground;
-  const signers = await ethers.getSigners();
-  const owner = signers[0];
-  const shareholders = [
+  let signers;
+  let owner;
+  let shareholders;
+  let newShareholders;
+  
+
+  beforeEach(async () => {
+    signers = await ethers.getSigners();
+    owner = signers[0];
+    shareholders = [
     {
       address: signers[1].address,
       share: 50,
@@ -33,7 +40,20 @@ describe("Playground Contract", async function () {
     },
   ];
 
-  beforeEach(async () => {
+    newShareholders = [
+      {
+        address: signers[10].address,
+        signer: signers[10],
+      },
+      {
+        address: signers[11].address,
+        signer: signers[11],
+      },
+      {
+        address: signers[12].address,
+        signer: signers[12],
+      },
+    ]
     const Playground = await ethers.getContractFactory("Playground");
     playground = await Playground.deploy(
       "Playground",
@@ -43,14 +63,6 @@ describe("Playground Contract", async function () {
     );
     await playground.deployed();
   });
-
-  const niceMint = async function () {
-    for (const shareholder of shareholders) {
-      await playground
-        .connect(owner)
-        .mint(shareholder.address, shareholder.share);
-    }
-  };
 
   const niceDeposit = async function (amount) {
     await playground.connect(owner).setApprovalForAll(playground.address, true);
@@ -74,8 +86,6 @@ describe("Playground Contract", async function () {
 
   describe("mint", function () {
     it("can mint NFTs", async function () {
-      await niceMint();
-
       for (const shareholder of shareholders) {
         await expect(await playground.balanceOf(shareholder.address)).to.equal(
           1
@@ -106,13 +116,7 @@ describe("Playground Contract", async function () {
         }
       }
 
-      expect(totalShares).to.equal(await playground.totalShares());
-    });
-
-    it("cannot mint with 0 share", async function () {
-      await expect(
-        playground.connect(owner).mint(shareholders[0].address, 0)
-      ).to.be.revertedWith("Amount should be bigger than 0");
+      expect(totalShares).to.equal(100);
     });
   });
 
@@ -143,8 +147,19 @@ describe("Playground Contract", async function () {
   });
 
   describe("claim", function () {
+    it("should revert when claim is made by someone who is not the owner of the token", async function () {
+      await niceDeposit(ethers.utils.parseEther("100"));
+
+      const snapshot = await getSnapshot();
+      const [shareholder1, shareholder2] = shareholders;
+      const shareholder1Token = snapshot[shareholder1.address][0]; // 50% share
+
+      await expect(
+        playground.connect(shareholder2.signer).claim(shareholder1Token.tokenId)
+      ).to.be.revertedWith("You are not the owner of this token.");
+    });
+
     it("can claim deposited share", async function () {
-      await niceMint();
       await niceDeposit(ethers.utils.parseEther("100"));
 
       const snapshot = await getSnapshot();
@@ -209,4 +224,50 @@ describe("Playground Contract", async function () {
       );
     });
   });
+
+  describe("split nft", function () {
+    // token ids start with 0 
+    it("only token owner can call this functin, not even contract owner", async function () {
+			await expect(
+				playground.connect(owner).splitToken(owner.address, 2, shareholders[0].share)
+			).to.be.revertedWith("You are not the owner of this token.");
+		});
+
+    it("owner can not allocate more shares than what the nft has", async function () {
+			await expect(
+				playground.connect(shareholders[0].signer).splitToken(shareholders[0].address, 0, shareholders[0].share + 10)
+			).to.be.revertedWith("New shares must be less than your available share");
+		});
+
+    it("cannot create new nft with 0 shares", async function () {
+			await expect(
+				playground.connect(shareholders[0].signer).splitToken(shareholders[0].address, 0, 0)
+			).to.be.revertedWith("Shares must be greater than 0");
+		});
+
+    it("Token split to new user", async function () {
+      const currentSupply = await playground.totalSupply();
+      const newShareAmount = 10;
+      const currentTokenId = 0;
+      const sharesOfCurrent = await playground.shares(currentTokenId);
+      expect(currentSupply).to.equal(5)
+      // user transfering 10% share to someone new 
+      await playground.connect(shareholders[0].signer).splitToken(newShareholders[1].address, currentTokenId, newShareAmount);
+      const newTotalSupply = await playground.totalSupply()
+      expect(newTotalSupply).to.equal(Number(currentSupply) + 1)
+      expect(await playground.ownerOf(0)).to.equal(shareholders[0].address);
+      const newTokenId = Number(currentSupply);
+      expect(await playground.ownerOf(newTokenId)).to.equal(newShareholders[1].address);
+      expect(await playground.shares(newTokenId)).to.equal(newShareAmount);
+      let totalShares = 0;
+      for (let index = 0; index <= newTotalSupply; index++) {
+        const amount = await playground.shares(index);
+        totalShares += Number(amount);
+      }
+      console.log({ totalShares })
+      expect(totalShares).to.equal(100);
+      expect(await playground.shares(currentTokenId)).to.equal(Number(sharesOfCurrent - newShareAmount));
+
+		});
+  })
 });

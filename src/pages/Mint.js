@@ -1,6 +1,7 @@
 import React, {useEffect} from "react";
 import NameInput from "../components/misc/NameInput"
 import SharesTable from "../components/misc/SharesTable"
+import ProjectDetails from "../components/misc/ProjectDetails"
 import { useFactoryContract, useProjectContract } from "../hooks/useContract";
 import { useWeb3Context } from "../hooks/useWeb3Context";
 import { useNavigate } from 'react-router-dom';
@@ -9,7 +10,7 @@ import { useNavigate } from 'react-router-dom';
 
 export default function Mint() {
     const navigate = useNavigate();
-    const {account, isPageLoaded, provider, contractAddress, setContractAddress} = useWeb3Context();
+    const {account, isPageLoaded, provider, contractMetadata, setContractMetadata} = useWeb3Context();
     const [shareTotal, setShareTotal] = React.useState(0)
     const [contractLoaded, setContractLoaded] = React.useState(false)
     // const [contractAddress, setContractAddress] = React.useState(null)
@@ -17,13 +18,12 @@ export default function Mint() {
     // TODO: get contract address from user input
     // const contract = usePlaygroundProject();
     const contract = useFactoryContract();
-    const playgroundContract = useProjectContract(contractAddress.address);
+    const playgroundContract = useProjectContract(contractMetadata.address);
 
 
     const createProject = async () => {
         const addresses = shareholders.map((s) => s.tokenOwner);
         const shares = shareholders.map((s) => s.tokenShare)
-        console.log({ addresses, shares})
         try {
            const txn =  await contract.createProject(fields.projectName, fields.symbol, addresses, shares)
            const res = await txn.wait()
@@ -31,7 +31,7 @@ export default function Mint() {
            const event = res.events.filter((e) => e.event === "ProjectCreated")
            const args = event[0].args
            console.log({ event, args })
-           setContractAddress({
+           setContractMetadata({
                address: args[0],
                projectName: args[1],
                symbol: args[2]
@@ -55,7 +55,6 @@ export default function Mint() {
     })
     const [shareholders, setShareholders] = React.useState([]);
     const handleInputChange = (e) => {
-        console.log({ e, [e.target.name]:e.target.value })
         setFields({
             ...fields,
             [e.target.name]:e.target.value
@@ -64,11 +63,6 @@ export default function Mint() {
     
     const handleAddShareholder = async () => {
         try {
-            // await contract.mint(fields.publicKey, fields.amount )
-            // const newTotal = sharetotal + fields.amount
-            // if (newTotal >100) {
-            //     return false
-            // }
             const newShareholders = [
             ...shareholders, 
             {
@@ -109,6 +103,17 @@ export default function Mint() {
 
     }
 
+    const handleConfirmSplit = async ({ to, tokenId, newShare }) => {
+        try {
+            const txn = await playgroundContract.splitToken();
+            console.log({ txn })
+            
+        } catch (error) {
+            console.log({ error })
+            
+        }
+    }
+
     const handleGetTokensAndShares = async () => {
         try {
             const name = await playgroundContract.name();
@@ -135,6 +140,7 @@ export default function Mint() {
               return setShareholders(shareholders)
         } catch (error) {
             console.log({ error })
+            throw error;
             
         }
     }
@@ -149,7 +155,7 @@ export default function Mint() {
    }
 
     const initialise = () => {
-        if(contractAddress.address) handleGetTokensAndShares()
+        if(contractMetadata.address) handleGetTokensAndShares()
     }
     useEffect(() => {
             if (!contract || !provider) {
@@ -161,7 +167,7 @@ export default function Mint() {
                   window.alert("Successfully Minted");
               });
             });
-        }, [contract, provider, contractAddress.address]);
+        }, [contract, provider, contractMetadata.address]);
     if (!isPageLoaded) return  <div>Loading.... </div>
     return (
         <div className="container mx-auto p-4">
@@ -170,24 +176,11 @@ export default function Mint() {
             <div className="mt-8 flex gap-6">
                 {!contractLoaded ? 
                 <>
-                 <NameInput displayName="Project Name" name="projectName"   value={fields.projectName}     placeholder={`Eg. "Project Makeover"`}  onChange={handleInputChange}/>
+                <NameInput displayName="Project Name" name="projectName"   value={fields.projectName}     placeholder={`Eg. "Project Makeover"`}  onChange={handleInputChange}/>
                 <NameInput displayName="Symbol" name="symbol"  value={fields.symbol}   placeholder={`Eg. "PM"`}  onChange={handleInputChange}/>
-           
                 </>
                 :
-                <>
-                 <div>
-                    <p className="text-xs opacity-50">Project Name</p>
-                    <p>{fields.projectName}</p>
-
-                </div>
-                <div>
-                    <p className="text-xs opacity-50">Symbol</p>
-                    <p>{fields.symbol}</p>
-
-                </div>
-                
-                </>
+                <ProjectDetails projectName={fields.projectName} projectSymbol={fields.symbol} />
             }
                 </div>
            
@@ -196,7 +189,16 @@ export default function Mint() {
                 <div className="overflow-x-auto sm:-mx-6 lg:-mx-8">
                     <div className="py-2 inline-block min-w-full sm:px-6 lg:px-8">
                         <div className="overflow-hidden">
-                            <SharesTable shares={shareholders} account={account} contractLoaded={contractLoaded} deleteShareholder={deleteShareholder} shareTotal={shareTotal} />
+                            <SharesTable 
+                                shares={shareholders} 
+                                account={account} 
+                                contractLoaded={contractLoaded} 
+                                deleteShareholder={deleteShareholder} 
+                                shareTotal={shareTotal} 
+                                contract={playgroundContract} 
+                                confrim={handleConfirmSplit}
+                                refresh={handleGetTokensAndShares}
+                            />
                         
                             {shareholders.length === 0 && <div className="text-center mt-2 text-sm"> You currently haven't added any shareholders. Add some below.</div>}
                         </div>
