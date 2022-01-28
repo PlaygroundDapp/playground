@@ -1,4 +1,4 @@
-export default function ShareTable({ shares, account, contractLoaded, shareTotal, deleteShareholder=false, totalClaimed=0, claim=false}) {
+export default function ShareTable({ shares, account, contractLoaded, shareTotal, deleteShareholder=false, totalClaimed=0, totalToClaim=0, claim=false }) {
   return (
     <div className="overflow-x-auto sm:-mx-6 lg:-mx-8">
       <div className="py-2 inline-block min-w-full sm:px-6 lg:px-8">
@@ -30,10 +30,14 @@ export default function ShareTable({ shares, account, contractLoaded, shareTotal
                       ) || (
                         <>
                         <th scope="col" className="text-sm font-medium text-gray-900 px-6 py-4 text-right">
-                          Amount Claimed
+                          Claimed Revenue
                         </th>
 
                         <th scope="col" className="text-sm font-medium text-gray-900 px-6 py-4 text-right">
+                          Unclaimed Revenue
+                        </th>
+
+                        <th scope="col" className="text-sm font-medium text-gray-900 px-6 py-4 text-center">
                           Claim
                         </th>
                         </>
@@ -69,8 +73,11 @@ export default function ShareTable({ shares, account, contractLoaded, shareTotal
                     </td>
                   ) || (
                     <>
-                      <td className="px-6 py-4 text-gray-900 font-light whitespace-nowrap text-right">{s.amountClaimed}</td>
-                      <td className="px-6 py-4"><button className="btn-primary btn float-right" onClick={() => claim(s.tokenId)}> Claim</button></td>
+                      <td className="px-6 py-4 text-gray-900 font-light whitespace-nowrap text-right">{s.amountClaimed} ETH</td>
+                      <td className="px-6 py-4 text-gray-900 font-light whitespace-nowrap text-right">{s.amountToClaim} ETH</td>
+                      <td className="px-6 py-4 text-center">
+                        <button className="btn-primary btn" disabled={s.amountToClaim <= 0} onClick={() => claim(s.tokenId)}> Claim</button>
+                      </td>
                     </>
                   )}
                 </tr>
@@ -88,15 +95,19 @@ export default function ShareTable({ shares, account, contractLoaded, shareTotal
                 </td>
 
                 {
-                  claim && (
-                    <td className="text-sm text-gray-900 font-light px-6 py-4 whitespace-nowrap text-right">
-                    Total Claimed: {totalClaimed}
-                    </td>
-                  )
-                }
-                <td className="text-sm text-gray-900 font-light px-6 py-4 whitespace-nowrap">
+                  !claim && (
+                    <td className="text-sm text-gray-900 font-light px-6 py-4 whitespace-nowrap">
 
-                </td>
+                    </td>
+                  ) || (
+                    <>
+                    <td className="text-sm text-gray-900 font-light px-6 py-4 whitespace-nowrap text-right">Total Claimed: {totalClaimed} ETH</td>
+                    <td className="text-sm text-gray-900 font-light px-6 py-4 whitespace-nowrap text-right">Total Unclaimed: {totalToClaim} ETH</td>
+                    <td className="text-sm text-gray-900 font-light px-6 py-4 whitespace-nowrap text-center">
+
+                    </td>
+                    </>
+                )}
               </tr>
             </tbody>
         </table>

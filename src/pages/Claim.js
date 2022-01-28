@@ -14,6 +14,7 @@ export default function Claim() {
   const [projectSymbol, setProjectSymbol] = useState();
   const [projectRevenue, setProjectRevenue] = useState();
   const [totalClaimed, setTotalClaimed] = useState();
+  const [totalToClaim, setTotalToClaim] = useState();
 
   // TODO: get contract address from user input
   let contract;
@@ -57,20 +58,31 @@ export default function Claim() {
       const tokens = [];
       let total = 0;
       let totalClaimed = 0;
+      let totalToClaim = 0;
       try {
-        // const contract = getContract();
+        const projectRevenue = ethers.utils.formatEther(await contract.totalDepositedAmount())
+        setProjectRevenue(projectRevenue);
+
         const numberOfTokens = await contract.balanceOf(account);
         for (let i = 0; i < numberOfTokens; i++) {
           let token = await contract.tokenOfOwnerByIndex(account, i);
           const tokenId = token.toString();
           let share = await contract.shares(tokenId);
           let amountClaimed = ethers.utils.formatEther(await contract.claimedAmount(tokenId));
-          total += parseInt(share);
-          totalClaimed += amountClaimed;
+          
+          let amountDeserved = (projectRevenue * share) / 100;
+          let amountToClaim = amountDeserved - amountClaimed;
+
+                    
+          total += parseFloat(share);
+          totalClaimed += parseFloat(amountClaimed);
+          totalToClaim += parseFloat(amountToClaim);
+
           tokens.push({
             tokenId: tokenId,
             tokenShare: share.toString(),
-            amountClaimed: amountClaimed
+            amountClaimed: amountClaimed,
+            amountToClaim: amountToClaim
           });
         }
       } catch (error) {
@@ -80,10 +92,10 @@ export default function Claim() {
 
       setProjectSymbol(await contract.symbol());
       setProjectName(await contract.name())
-      setProjectRevenue(ethers.utils.formatEther(await contract.totalDepositedAmount()));
       setTokens(tokens);
       setShareTotal(total);
       setTotalClaimed(totalClaimed);
+      setTotalToClaim(totalToClaim);
     }
 
     return (
@@ -99,7 +111,7 @@ export default function Claim() {
         { tokens.length > 0 && (
           <div className="border-2 p-6 mt-6">
             <h1 className="text-l font-bold"> Tokens </h1>
-            <SharesTable shares={tokens} account={account} contractLoaded={true} shareTotal={shareTotal} claim={claimEarnings}/>
+            <SharesTable shares={tokens} account={account} contractLoaded={true} shareTotal={shareTotal} totalClaimed={totalClaimed} totalToClaim={totalToClaim} claim={claimEarnings} />
           </div>
         )}
       </div>
