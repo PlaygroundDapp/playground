@@ -3,6 +3,7 @@ import {Link, useLocation} from "react-router-dom"
 import { useWeb3Context } from "../../hooks/useWeb3Context";
 import queryString from "query-string";
 import { useNavigate  } from "react-router-dom";
+import { useIsSupportedNetwork } from "../../hooks/useIsSupportedNetwork";
 
 // import { checkIfWalletIsConnected, connectWallet } from "../../utils/common"
 
@@ -13,7 +14,8 @@ export default function NavBar(){
     const parsed = queryString.parse(location.search);
     const navigate = useNavigate();
     // const [metaAccount, setMetaAccount] = React.useState(null);
-    const { isActive, connectWallet, account } = useWeb3Context();
+    const { isActive, connectWallet, account, chainId } = useWeb3Context();
+    const isSupportedNetwork = useIsSupportedNetwork()
     const routes = [
         {
             name: "Mint",
@@ -64,7 +66,8 @@ export default function NavBar(){
                 </div> */}
             </div>
         </header>
-        {!isActive ? 
+        {isSupportedNetwork ?
+        (!isActive ? 
          <div className="text-center mt-4">
          <button className="btn-primary btn" onClick={connectWallet}> Connect wallet</button> 
 
@@ -76,6 +79,10 @@ export default function NavBar(){
 
         </div>
         </>
+        ) :
+        <div className="text-center mt-4">
+            The network you are on (ChainID: {chainId}) is not supported yet. Please connect to Rinkeby.
+        </div>
         }
        
         </div>
