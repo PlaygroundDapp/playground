@@ -6,42 +6,42 @@ import SharesTable from "../components/misc/SharesTable";
 import ProjectDetails from "../components/misc/ProjectDetails";
 
 export default function Claim() {
-  const { account, provider, contractMetadata } = useWeb3Context();
+  const { account, provider, contractMetadata, setContractMetadata } = useWeb3Context();
   const [tokens, setTokens] = useState([]);
+  const [contractAddress, setContractAddress] = useState(contractMetadata.address);
   const [shareTotal, setShareTotal] = useState(0);
-  const [currentContractAddress, setCurrentContractAddress] = useState(contractMetadata.address);
   const [projectName, setProjectName] = useState();
   const [projectSymbol, setProjectSymbol] = useState();
   const [projectRevenue, setProjectRevenue] = useState();
   const [totalClaimed, setTotalClaimed] = useState();
   const [totalToClaim, setTotalToClaim] = useState();
 
-  // TODO: get contract address from user input
-  let contract;
-
   useEffect(() => {
-    if (!contract || !provider) {
-      return;
-    }
-    provider.once("block", () => {
-      contract.on("Claim", () => {
-        window.alert("Successfully Claimed");
-      });
-    });
-  }, [contract, provider]);
+    setContractAddress(contractMetadata.address);
+  }, [contractMetadata.address]);
 
   const handleAddressChange = (e) => {
-    setCurrentContractAddress(e.target.value);
+    setContractAddress(e.target.value);
+    setContractMetadata(e.target.value);
   }
 
   const ClaimEarnings = (props) => {
+    const contract = useProjectContract(props.address);
 
-    let contract = useProjectContract(props.address);
+    useEffect(() => {
+      if (!contract || !provider) {
+        return;
+      }
+      provider.once("block", () => {
+        contract.on("Claim", () => {
+          window.alert("Successfully Claimed");
+        });
+      });
+    }, [contract, provider]);
 
     if (!contract) {
       return null;
     }
-
 
     const claimEarnings = async (tokenId) => {
       try {
@@ -98,12 +98,11 @@ export default function Claim() {
       setTotalToClaim(totalToClaim);
     }
 
+
+    getTokensForUser();
+
     return (
       <div>
-        <div className="mb-8">
-          <button className="btn btn-primary w-full rounded-full" onClick={() => getTokensForUser()}> Get Tokens</button>
-        </div>
-
         { projectName && (
           <div className="flex gap-6"><ProjectDetails projectName={projectName} projectSymbol={projectSymbol} projectRevenue={projectRevenue} /></div>
         )}
@@ -125,10 +124,10 @@ export default function Claim() {
       <h1 className="text-4xl mt-16">Claim</h1>
 
       <div className="mt-8 mb-4">
-        <input type="text" placeholder="Contract address" className="input input-bordered w-full" value={currentContractAddress} onChange={handleAddressChange}/>
+        <input type="text" placeholder="Contract address" className="input input-bordered w-full" value={contractAddress} onChange={handleAddressChange}/>
       </div>
 
-      <ClaimEarnings address={currentContractAddress} />
+      <ClaimEarnings address={contractAddress} />
     </div>
   )
 }
