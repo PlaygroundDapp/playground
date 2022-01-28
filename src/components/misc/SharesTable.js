@@ -1,6 +1,71 @@
-export default function ShareTable({ shares, account, contractLoaded, shareTotal, deleteShareholder=false, claim=false}) {
+import React from "react";
+import { useInputChange } from "../../hooks/useInputChange";
+import NameInput from "../misc/NameInput"
+
+
+export default function ShareTable({ shares, account, contractLoaded, shareTotal, deleteShareholder=false, claim=false, contract, refresh }) {
+  
+  const [openModal, setOpenModal] = React.useState(false)
+  const [selectedShareHolder, setSelctedShareHolder] = React.useState(null)
+  const [input, handleInputChange, setInput] = useInputChange();
+  const [isLoading, setLoading] = React.useState(false);
+  const [error, setError] = React.useState(false)
+  const handleSplitShares = (selected) => {
+    setSelctedShareHolder(selected)
+      setOpenModal(true)
+  }
+
+  const confirmSplit = async () => {
+    setLoading(true)
+    setError(false)
+    console.log({ selectedShareHolder })
+    try {
+       const txn = await contract.splitToken(input.publicKey, selectedShareHolder.tokenId, input.amount);
+       const res = await txn.wait();
+       console.log({ txn, res })
+       await refresh();
+       setInput({
+         ...input,
+         publicKey: "",
+         amount:"",
+       })
+       setOpenModal(false)
+       setLoading(false)
+    } catch (error) {
+      console.log({ error })
+      setLoading(false)
+      setError(true)
+      
+    }
+
+  }
   return (
-    <table className="min-w-full">
+    <>
+      <div className="modal-open">
+        <div className={`modal ${openModal && "modal-open"}`}>
+          <div className="modal-box">
+            <p className="text-lg font-bold">Split your shares </p> 
+            <p className="text-sm">Enter the address of the shareholder you want to split with. (You cannot split more than {selectedShareHolder && selectedShareHolder.tokenShare}) </p> 
+            <p className="text-sm"> DO NOT USE DECIMAL POINTS </p> 
+            <div className="mt-6 grid gap-6">
+                <NameInput placeholder={"Public Address"} value={input.publicKey} onChange={handleInputChange} name="publicKey" />
+                <NameInput placeholder="Share" value={input.amount} onChange={handleInputChange} name="amount"  type="number"/>
+
+              </div>
+            <div className={`text-xs mt-4 flex ${!error && "hidden"}`}>
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-red-600 mr-2" viewBox="0 0 20 20" fill="currentColor">
+              <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+            </svg>
+              There was an error please try again later
+            </div>
+            <div className="modal-action">
+              <label htmlFor="my-modal-2" className={`btn btn-primary ${isLoading && "loading"}`} onClick={confirmSplit} disabled={selectedShareHolder &&((Number(input.amount) >= selectedShareHolder.tokenShare) || input.publicKey.length < 3)}>Confirm</label> 
+              <label htmlFor="my-modal-2" className="btn" onClick={()=> setOpenModal(false)}>Cancel</label>
+            </div>
+          </div>
+        </div>
+      </div>
+      <table className="min-w-full">
       <thead className="bg-white border-b">
           <tr>
               <th scope="col" className="text-sm font-medium text-gray-900 px-6 py-4 text-left">
@@ -41,7 +106,7 @@ export default function ShareTable({ shares, account, contractLoaded, shareTotal
             { !claim && (
               <td className="text-sm text-gray-900 font-light px-6 py-4 whitespace-nowrap">
                 {s.tokenOwner}
-                {(account === s.tokenOwner) && "(Your address)"}
+                {(account.toLowerCase() === s.tokenOwner.toLowerCase()) && "(Your address)"}
               </td>
             )}
 
@@ -55,6 +120,11 @@ export default function ShareTable({ shares, account, contractLoaded, shareTotal
                   <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
                     <path fillRule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clipRule="evenodd" />
                   </svg>
+                </button> 
+                <button className={`btn btn-circle btn-sm modal-button ${!contractLoaded &&  "hidden"}`} onClick={() => handleSplitShares(s)} disabled={!(account.toLowerCase() === s.tokenOwner.toLowerCase())}>
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.121 14.121L19 19m-7-7l7-7m-7 7l-2.879 2.879M12 12L9.121 9.121m0 5.758a3 3 0 10-4.243 4.243 3 3 0 004.243-4.243zm0-5.758a3 3 0 10-4.243-4.243 3 3 0 004.243 4.243z" />
+                </svg>
                 </button> 
               </td>
             )}
@@ -82,5 +152,7 @@ export default function ShareTable({ shares, account, contractLoaded, shareTotal
         </tr>
       </tbody>
   </table>
+    
+    </>
   )
 }

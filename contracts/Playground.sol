@@ -4,11 +4,14 @@ pragma solidity ^0.8.0;
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts/utils/math/SafeMath.sol";
+
 import "hardhat/console.sol";
 
 contract Playground is ERC721Enumerable, Ownable {
     using Counters for Counters.Counter;
     using Strings for uint256;
+    using SafeMath for uint256;
 
     Counters.Counter public _tokenIds;
 
@@ -116,12 +119,15 @@ contract Playground is ERC721Enumerable, Ownable {
             "New shares must be less than your available share"
         );
         require(_newShare > 0, "Shares must be greater than 0");
-        uint256 tokenId = _tokenIds.current();
-        _safeMint(_to, tokenId);
-        shares[tokenId] = _newShare;
+        uint256 newTokenId = _tokenIds.current();
+        _safeMint(_to, newTokenId);
+        shares[newTokenId] = _newShare;
         _tokenIds.increment();
+        uint256 existingShare = shares[_tokenId];
+        uint256 updatedTokenShare = existingShare.sub(_newShare);
+        shares[_tokenId] = updatedTokenShare;
         emit Mint(_to, _newShare);
-        return tokenId;
+        return newTokenId;
         // test with i token then split into 2
         // check current supply to make sure its 1
         // check current token id to equal 1
