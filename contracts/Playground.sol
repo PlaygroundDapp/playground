@@ -87,6 +87,15 @@ contract Playground is ERC721Enumerable, Ownable {
         return totalDeposit;
     }
 
+    function claimedAmount(uint256 _tokenId) external view onlyShareholders returns (uint256) {
+        require(
+            ownerOf(_tokenId) == msg.sender,
+            "You are not the owner of this token."
+        );
+
+        return amountsClaimed[_tokenId];
+    }
+
     function claim(uint256 _tokenId) external onlyShareholders {
         require(
             ownerOf(_tokenId) == msg.sender,

@@ -127,6 +127,18 @@ describe("Playground Contract", async function () {
   });
 
   describe("claim", function () {
+    it("should revert when claim is made by someone who is not the owner of the token", async function () {
+      await niceDeposit(ethers.utils.parseEther("100"));
+
+      const snapshot = await getSnapshot();
+      const [shareholder1, shareholder2] = shareholders;
+      const shareholder1Token = snapshot[shareholder1.address][0]; // 50% share
+
+      await expect(
+        playground.connect(shareholder2.signer).claim(shareholder1Token.tokenId)
+      ).to.be.revertedWith("You are not the owner of this token.");
+    });
+
     it("can claim deposited share", async function () {
       await niceDeposit(ethers.utils.parseEther("100"));
 
