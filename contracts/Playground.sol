@@ -4,11 +4,14 @@ pragma solidity ^0.8.0;
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
-import "hardhat/console.sol";
+import "@openzeppelin/contracts/utils/math/SafeMath.sol";
+
+// import "hardhat/console.sol";
 
 contract Playground is ERC721Enumerable, Ownable {
     using Counters for Counters.Counter;
     using Strings for uint256;
+    using SafeMath for uint256;
 
     Counters.Counter public _tokenIds;
 
@@ -44,18 +47,26 @@ contract Playground is ERC721Enumerable, Ownable {
     event Deposit(uint256 _amount);
     event Claim(address shareHolder, uint256 amountClaimed);
 
-    modifier onlyShareholders() {
-        bool isShareholder = false;
-        for (uint256 i = 0; i < totalSupply(); i++) {
-            if (ownerOf(i) == msg.sender) {
-                isShareholder = true;
-                break;
-            }
-        }
+    // modifier onlyShareholders() {
+    //     bool isShareholder = false;
+    //     for (uint256 i = 0; i < totalSupply(); i++) {
+    //         if (ownerOf(i) == msg.sender) {
+    //             isShareholder = true;
+    //             break;
+    //         }
+    //     }
 
+    //     require(
+    //         isShareholder,
+    //         "only shareholders are allowed to access this feature."
+    //     );
+    //     _;
+    // }
+
+    modifier isTokenHolder(uint256 _tokenId) {
         require(
-            isShareholder,
-            "only shareholders are allowed to access this feature."
+            ownerOf(_tokenId) == msg.sender,
+            "You are not the owner of this token."
         );
         _;
     }
@@ -78,29 +89,21 @@ contract Playground is ERC721Enumerable, Ownable {
         emit Deposit(msg.value);
     }
 
-    function totalDepositedAmount()
-        external
-        view
-        onlyShareholders
-        returns (uint256)
-    {
+    // onlyShareholders
+    function totalDepositedAmount() external view returns (uint256) {
         return totalDeposit;
     }
 
-    function claimedAmount(uint256 _tokenId) external view onlyShareholders returns (uint256) {
-        require(
-            ownerOf(_tokenId) == msg.sender,
-            "You are not the owner of this token."
-        );
-
+    function claimedAmount(uint256 _tokenId)
+        external
+        view
+        isTokenHolder(_tokenId)
+        returns (uint256)
+    {
         return amountsClaimed[_tokenId];
     }
 
-    function claim(uint256 _tokenId) external onlyShareholders {
-        require(
-            ownerOf(_tokenId) == msg.sender,
-            "You are not the owner of this token."
-        );
+    function claim(uint256 _tokenId) external isTokenHolder(_tokenId) {
         uint256 amountDeserved = (totalDeposit * shares[_tokenId]) / 100;
         uint256 amountToSend = amountDeserved - amountsClaimed[_tokenId];
 
@@ -118,23 +121,21 @@ contract Playground is ERC721Enumerable, Ownable {
         address _to,
         uint256 _tokenId,
         uint256 _newShare
-    ) external returns (uint256) {
-        require(ownerOf(_tokenId) == msg.sender, "You do not own this token");
+    ) external isTokenHolder(_tokenId) returns (uint256) {
+        // require(ownerOf(_tokenId) == msg.sender, "You do not own this token");
         require(
             shares[_tokenId] > _newShare,
             "New shares must be less than your available share"
         );
         require(_newShare > 0, "Shares must be greater than 0");
-        uint256 tokenId = _tokenIds.current();
-        _safeMint(_to, tokenId);
-        shares[tokenId] = _newShare;
+        uint256 newTokenId = _tokenIds.current();
+        _safeMint(_to, newTokenId);
+        shares[newTokenId] = _newShare;
         _tokenIds.increment();
+        uint256 existingShare = shares[_tokenId];
+        uint256 updatedTokenShare = existingShare.sub(_newShare);
+        shares[_tokenId] = updatedTokenShare;
         emit Mint(_to, _newShare);
-        return tokenId;
-        // test with i token then split into 2
-        // check current supply to make sure its 1
-        // check current token id to equal 1
-        //  check new token to equal 2
-        // once minted check supply to make sure it equals 2
+        return newTokenId;
     }
 }
