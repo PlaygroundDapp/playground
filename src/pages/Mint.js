@@ -24,7 +24,6 @@ export default function Mint() {
     const createProject = async () => {
         const addresses = shareholders.map((s) => s.tokenOwner);
         const shares = shareholders.map((s) => s.tokenShare)
-        console.log({ addresses, shares})
         try {
            const txn =  await contract.createProject(fields.projectName, fields.symbol, addresses, shares)
            const res = await txn.wait()
@@ -56,7 +55,6 @@ export default function Mint() {
     })
     const [shareholders, setShareholders] = React.useState([]);
     const handleInputChange = (e) => {
-        console.log({ e, [e.target.name]:e.target.value })
         setFields({
             ...fields,
             [e.target.name]:e.target.value
@@ -65,11 +63,6 @@ export default function Mint() {
     
     const handleAddShareholder = async () => {
         try {
-            // await contract.mint(fields.publicKey, fields.amount )
-            // const newTotal = sharetotal + fields.amount
-            // if (newTotal >100) {
-            //     return false
-            // }
             const newShareholders = [
             ...shareholders, 
             {
@@ -110,6 +103,17 @@ export default function Mint() {
 
     }
 
+    const handleConfirmSplit = async ({ to, tokenId, newShare }) => {
+        try {
+            const txn = await playgroundContract.splitToken();
+            console.log({ txn })
+            
+        } catch (error) {
+            console.log({ error })
+            
+        }
+    }
+
     const handleGetTokensAndShares = async () => {
         try {
             const name = await playgroundContract.name();
@@ -136,6 +140,7 @@ export default function Mint() {
               return setShareholders(shareholders)
         } catch (error) {
             console.log({ error })
+            throw error;
             
         }
     }
@@ -181,10 +186,24 @@ export default function Mint() {
            
             <div className="border-2 p-6 mt-6">
                 <h1 className="text-l font-bold"> Shareholders </h1>
-                <SharesTable shares={shareholders} account={account} contractLoaded={contractLoaded} deleteShareholder={deleteShareholder} shareTotal={shareTotal} />
-            
-                {shareholders.length === 0 && <div className="text-center mt-2 text-sm"> You currently haven't added any shareholders. Add some below.</div>}
-
+                <div className="overflow-x-auto sm:-mx-6 lg:-mx-8">
+                    <div className="py-2 inline-block min-w-full sm:px-6 lg:px-8">
+                        <div className="overflow-hidden">
+                            <SharesTable 
+                                shares={shareholders} 
+                                account={account} 
+                                contractLoaded={contractLoaded} 
+                                deleteShareholder={deleteShareholder} 
+                                shareTotal={shareTotal} 
+                                contract={playgroundContract} 
+                                confrim={handleConfirmSplit}
+                                refresh={handleGetTokensAndShares}
+                            />
+                        
+                            {shareholders.length === 0 && <div className="text-center mt-2 text-sm"> You currently haven't added any shareholders. Add some below.</div>}
+                        </div>
+                    </div>
+                </div>
                 {shareTotal > 100 && (
                     <div className="flex text-sm text-red-600">
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
