@@ -12,9 +12,10 @@ export default function NavBar(){
 
     const location = useLocation();
     const parsed = queryString.parse(location.search);
+    console.log({ navparse: parsed })
     const navigate = useNavigate();
     // const [metaAccount, setMetaAccount] = React.useState(null);
-    const { isActive, connectWallet, account, chainId } = useWeb3Context();
+    const { isActive, connectWallet, account, chainId, setContractMetadata } = useWeb3Context();
     const isSupportedNetwork = useIsSupportedNetwork()
     const routes = [
         {
@@ -28,6 +29,13 @@ export default function NavBar(){
             route: "/claim"
         }
     ]
+
+    React.useEffect(() => {
+        if (parsed.contractAddress) setContractMetadata({
+            address: parsed.contractAddress
+        })
+
+    }, [parsed.contractAddress, setContractMetadata])
 
 
     return (
@@ -51,8 +59,8 @@ export default function NavBar(){
                             } py-2 hover:text-primary`}
                         >
                             <Link to={{
-                                pathname:`${route.route}`,
-                                search: `${parsed.contractAddress? `?contractAddress=${parsed.contractAddress }`: "" }`,
+                                pathname:`${route.route}${parsed.contractAddress? `?contractAddress=${parsed.contractAddress }`: "" }`,
+                                // search: `${parsed.contractAddress? `?contractAddress=${parsed.contractAddress }`: "" }`,
                             }}>
                             {route.name} 
                                 {/* <a className=""> {route.name} </a> */}
