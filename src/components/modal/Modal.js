@@ -6,7 +6,7 @@ export const useModal = () => {
   return modal;
 };
 
-export const ModalContextProvider = () => {
+export const ModalContextProvider = ({ children }) => {
   const [show, setShow] = useState(false);
   const [Title, setTitle] = useState("");
   const [Body, setBody] = useState("");
@@ -24,10 +24,11 @@ export const ModalContextProvider = () => {
   const contextValue = {
     modal: {
       show: (props) => setModalStates(props),
-      showTx: ({ title, body, txHash }) => {
+      showPendingTx: (tx) => {
+        const txHash = tx.hash;
         setModalStates({
-          title,
-          body,
+          title: "Pending",
+          body: `Check tx ${txHash} on Etherscan`,
           button: "Etherscan",
           action: () => {
             const url = `https://rinkeby.etherscan.io/tx/${txHash}`;
@@ -48,23 +49,22 @@ export const ModalContextProvider = () => {
 
   return (
     <ModalContext.Provider value={contextValue}>
-      <div className="modal-open">
-        <div className={`modal ${show && "modal-open"}`}>
-          <div className="modal-box">
-            <p className="text-lg font-bold">{Title}</p>
-            <p className="text-sm">{Body}</p>
-            <div className="modal-action">
-              <label
-                htmlFor="my-modal-2"
-                className={`btn btn-primary`}
-                onClick={ButtonAction ?? (() => {})}
-              >
-                {ButtonTitle}
-              </label>
-              <label htmlFor="my-modal-2" className="btn" onClick={handleClose}>
-                Close
-              </label>
-            </div>
+      {children}
+      <div className={`modal ${show && "modal-open"}`}>
+        <div className="modal-box">
+          <p className="text-lg font-bold">{Title}</p>
+          <p className="text-sm">{Body}</p>
+          <div className="modal-action">
+            <label
+              htmlFor="my-modal-2"
+              className={`btn btn-primary`}
+              onClick={ButtonAction ?? (() => {})}
+            >
+              {ButtonTitle}
+            </label>
+            <label htmlFor="my-modal-2" className="btn" onClick={handleClose}>
+              Close
+            </label>
           </div>
         </div>
       </div>

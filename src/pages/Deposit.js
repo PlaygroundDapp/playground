@@ -5,6 +5,7 @@ import { useWeb3Context } from "../hooks/useWeb3Context";
 import { useProjectContract } from "../hooks/useContract";
 import SharesTable from "../components/misc/SharesTable";
 import ProjectDetails from "../components/misc/ProjectDetails";
+import { useModal } from "../components/modal/Modal";
 
 export default function Deposit() {
   const { provider, contractMetadata, setContractMetadata } = useWeb3Context();
@@ -13,6 +14,7 @@ export default function Deposit() {
   const [shareTotal, setShareTotal] = useState();
   const [projectName, setProjectName] = useState();
   const [projectSymbol, setProjectSymbol] = useState();
+  const modal = useModal();
 
   useEffect(() => {
     if (!contract || !provider) {
@@ -63,6 +65,7 @@ export default function Deposit() {
 
     const response = await contract.deposit({ value: amount });
     console.log(response);
+    modal.showPendingTx(response);
   }
 
   const handleAddressChange = (e) => {
