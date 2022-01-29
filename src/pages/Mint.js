@@ -6,6 +6,7 @@ import { useFactoryContract, useProjectContract } from "../hooks/useContract";
 import { useWeb3Context } from "../hooks/useWeb3Context";
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import ChangeAddress from "../components/misc/ChangeAddress";
+import { useModal } from "../components/modal/Modal";
 
 
 
@@ -16,7 +17,8 @@ export default function Mint() {
     const [shareTotal, setShareTotal] = React.useState(0)
     const [contractLoaded, setContractLoaded] = React.useState(false)
     // const [contractAddress, setContractAddress] = React.useState(null)
-    
+    const modal = useModal();
+
     // TODO: get contract address from user input
     // const contract = usePlaygroundProject();
     const contract = useFactoryContract();
@@ -28,6 +30,7 @@ export default function Mint() {
         const shares = shareholders.map((s) => s.tokenShare)
         try {
            const txn =  await contract.createProject(fields.projectName, fields.symbol, addresses, shares)
+           modal.showPendingTx(txn);
            const res = await txn.wait()
            console.log({ txn, res })
            const event = res.events.filter((e) => e.event === "ProjectCreated")
@@ -112,6 +115,7 @@ export default function Mint() {
         try {
             const txn = await playgroundContract.splitToken();
             console.log({ txn })
+            modal.showPendingTx(txn);
             
         } catch (error) {
             console.log({ error })

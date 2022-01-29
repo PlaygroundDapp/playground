@@ -5,6 +5,7 @@ import { useProjectContract } from "../hooks/useContract";
 import SharesTable from "../components/misc/SharesTable";
 import ProjectDetails from "../components/misc/ProjectDetails";
 import ChangeAddress from "../components/misc/ChangeAddress";
+import { useModal } from "../components/modal/Modal";
 
 export default function Claim() {
   const { account, provider, contractMetadata, setContractMetadata } = useWeb3Context();
@@ -16,6 +17,7 @@ export default function Claim() {
   const [projectRevenue, setProjectRevenue] = useState();
   const [totalClaimed, setTotalClaimed] = useState();
   const [totalToClaim, setTotalToClaim] = useState();
+  const modal = useModal();
 
   useEffect(() => {
     setContractAddress(contractMetadata.address);
@@ -49,6 +51,7 @@ export default function Claim() {
         // const contract = getContract();
         const txn = await contract.claim(tokenId);
         console.log(txn);
+        modal.showPendingTx(txn);
         await txn.wait();
       } catch (error) {
         console.log(error);
