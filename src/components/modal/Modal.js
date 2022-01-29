@@ -28,7 +28,7 @@ export const ModalContextProvider = ({ children }) => {
         const txHash = tx.hash;
         setModalStates({
           title: "Pending",
-          body: `Check tx ${txHash} on Etherscan`,
+          body: `Check tx ${txHash.substring(0, 12)}... on Etherscan`,
           button: "Etherscan",
           action: () => {
             const url = `https://rinkeby.etherscan.io/tx/${txHash}`;
