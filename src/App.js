@@ -1,5 +1,5 @@
 import React from "react";
-import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
+import { BrowserRouter as Router, Route, Routes, HashRouter } from "react-router-dom";
 import "./input.css";
 import { Web3ContextProvider } from "./context/Web3Context";
 
@@ -13,7 +13,7 @@ import Deposit from "./pages/Deposit";
 function App() {
   return (
     <Web3ContextProvider>
-      <Router>
+      <HashRouter>
         <Header />
         <Container>
           <Routes>
@@ -22,7 +22,7 @@ function App() {
             <Route path="/deposit" element={<Deposit />} />
           </Routes>
         </Container>
-      </Router>
+      </HashRouter>
     </Web3ContextProvider>
   );
 }
