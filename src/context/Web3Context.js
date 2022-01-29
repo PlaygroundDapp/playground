@@ -5,6 +5,7 @@ import queryString from "query-string";
 export const Web3Context = createContext({
   provider: null,
   account: null,
+  chainId: null,
   isActive: false,
   isPageLoaded: false,
   contractMetadata: { address: "", projectName: "", symbol: "" },
@@ -14,6 +15,7 @@ export const Web3Context = createContext({
 export function Web3ContextProvider({ children }) {
   const [provider, setProvider] = useState(null);
   const [account, setAccount] = useState(null);
+  const [chainId, setChainId] = useState(null);
   const [isActive, setIsActive] = useState(false);
   const [isPageLoaded, setIsPageLoaded] = useState(false);
   const [contractMetadata, setContractMetadata] = useState({});
@@ -25,10 +27,15 @@ export function Web3ContextProvider({ children }) {
     const { ethereum } = window;
     if (!ethereum) return;
 
+    const provider = new ethers.providers.Web3Provider(ethereum);
+    setProvider(provider);
+
+    const { chainId } = await provider.getNetwork();
+    setChainId(chainId);
+
     const accounts = await ethereum.request({ method: "eth_accounts" });
     if (accounts.length) {
       setAccount(accounts[0]);
-      setProvider(new ethers.providers.Web3Provider(ethereum));
       setIsActive(true);
     }
   }
@@ -49,6 +56,7 @@ export function Web3ContextProvider({ children }) {
     () => ({
       provider,
       account,
+      chainId,
       isActive,
       isPageLoaded,
       contractMetadata,
@@ -62,7 +70,7 @@ export function Web3ContextProvider({ children }) {
         checkIfWalletIsConnected();
       },
     }),
-    [provider, account, isActive, isPageLoaded, contractMetadata]
+    [provider, account, chainId, isActive, isPageLoaded, contractMetadata]
   );
 
   return (
