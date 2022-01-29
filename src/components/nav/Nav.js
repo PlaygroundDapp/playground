@@ -50,7 +50,10 @@ export default function NavBar(){
                                 "border-b-2 border-primary text-primary"
                             } py-2 hover:text-primary`}
                         >
-                            <Link to={`${route.route}${parsed.contractAddress? `?contractAddress=${parsed.contractAddress }`: "" }`}>
+                            <Link to={{
+                                pathname:`${route.route}`,
+                                search: `${parsed.contractAddress? `?contractAddress=${parsed.contractAddress }`: "" }`,
+                            }}>
                             {route.name} 
                                 {/* <a className=""> {route.name} </a> */}
                             </Link>
