@@ -4,12 +4,14 @@ import SharesTable from "../components/misc/SharesTable"
 import ProjectDetails from "../components/misc/ProjectDetails"
 import { useFactoryContract, useProjectContract } from "../hooks/useContract";
 import { useWeb3Context } from "../hooks/useWeb3Context";
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
+import ChangeAddress from "../components/misc/ChangeAddress";
 
 
 
 export default function Mint() {
     const navigate = useNavigate();
+    let [searchParams, setSearchParams] = useSearchParams();
     const {account, isPageLoaded, provider, contractMetadata, setContractMetadata} = useWeb3Context();
     const [shareTotal, setShareTotal] = React.useState(0)
     const [contractLoaded, setContractLoaded] = React.useState(false)
@@ -36,7 +38,10 @@ export default function Mint() {
                projectName: args[1],
                symbol: args[2]
            })
-           navigate(`?contractAddress=${args[0]}`)
+        //    navigate(`?contractAddress=${args[0]}`)
+        navigate({
+            search: `?contractAddress=${args[0]}`,
+        })
     
 
         } catch (error) {
@@ -168,9 +173,11 @@ export default function Mint() {
               });
             });
         }, [contract, provider, contractMetadata.address]);
+        
     if (!isPageLoaded) return  <div>Loading.... </div>
     return (
         <div className="container mx-auto p-4">
+            <ChangeAddress />
             <h1 className="text-4xl mt-16"> Welcome to Playground</h1>
             <p className="text-sm mt-2 opacity-50"> Start by giving your projet name, symbol, add all your shareholders, then mint your new project</p>
             <div className="mt-8 flex gap-6">

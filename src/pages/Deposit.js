@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { ethers } from "ethers";
-
+import ChangeAddress from "../components/misc/ChangeAddress";
 import { useWeb3Context } from "../hooks/useWeb3Context";
 import { useProjectContract } from "../hooks/useContract";
 import SharesTable from "../components/misc/SharesTable";
@@ -70,21 +70,15 @@ export default function Deposit() {
       address: e.target.value
     })
   };
+  // 0x65f278D13e2EC98440d8eAde6FA8A08685089071
 
   return (
     <div className="container mx-auto">
-      <h1 className="text-4xl mt-16"> Deposit</h1>
+      <h1 className="text-4xl mt-16 mb-4"> Deposit</h1>
+      <ChangeAddress />
       <div className="mt-8 mb-4 flex gap-6">
-        {contract ?
+        {contract &&
           <ProjectDetails projectName={projectName} projectSymbol={projectSymbol} />
-        :
-          <input
-            type="text"
-            placeholder="Contract address"
-            className="input input-bordered w-full"
-            value={contractMetadata.address}
-            onChange={handleAddressChange}
-          />
         }
         
       </div>
