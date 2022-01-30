@@ -24,7 +24,7 @@ export const useFactoryContract = () => {
   let address;
   switch (chainId) {
     case 4: // rinkeby
-      address = "0x744813c66ceBD23a831B3D3e5A1C7dbB81AfA6d2";
+      address = "0x315f356813dF6175f0ba198784904d4d25215c9a";
       break;
     default:
       address = addressJson.FactoryContract;
