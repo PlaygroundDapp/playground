@@ -44,7 +44,7 @@ contract Playground is ERC721Enumerable, Ownable {
     }
 
 	string public baseURI =
-		"https://somewhere.com/api/metadata/";
+		"https://61f5e38c62f1e300173c4264.mockapi.io/api/tokenUri/Token/";
 
     function setBaseURI(string calldata _newURI) external onlyOwner {
 		baseURI = _newURI;
