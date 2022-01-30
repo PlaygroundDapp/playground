@@ -43,6 +43,17 @@ contract Playground is ERC721Enumerable, Ownable {
         }
     }
 
+	string public baseURI =
+		"https://somewhere.com/api/metadata/";
+
+    function setBaseURI(string calldata _newURI) external onlyOwner {
+		baseURI = _newURI;
+	}
+
+	function _baseURI() internal view override returns (string memory) {
+		return baseURI;
+	}
+
     event Mint(address _to, uint256 _share);
     event Deposit(uint256 _amount);
     event Claim(address shareHolder, uint256 amountClaimed);
