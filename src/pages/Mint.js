@@ -4,17 +4,21 @@ import SharesTable from "../components/misc/SharesTable"
 import ProjectDetails from "../components/misc/ProjectDetails"
 import { useFactoryContract, useProjectContract } from "../hooks/useContract";
 import { useWeb3Context } from "../hooks/useWeb3Context";
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
+import ChangeAddress from "../components/misc/ChangeAddress";
+import { useModal } from "../components/modal/Modal";
 
 
 
 export default function Mint() {
     const navigate = useNavigate();
+    let [searchParams, setSearchParams] = useSearchParams();
     const {account, isPageLoaded, provider, contractMetadata, setContractMetadata} = useWeb3Context();
     const [shareTotal, setShareTotal] = React.useState(0)
     const [contractLoaded, setContractLoaded] = React.useState(false)
     // const [contractAddress, setContractAddress] = React.useState(null)
-    
+    const modal = useModal();
+
     // TODO: get contract address from user input
     // const contract = usePlaygroundProject();
     const contract = useFactoryContract();
@@ -26,6 +30,7 @@ export default function Mint() {
         const shares = shareholders.map((s) => s.tokenShare)
         try {
            const txn =  await contract.createProject(fields.projectName, fields.symbol, addresses, shares)
+           modal.showPendingTx(txn);
            const res = await txn.wait()
            console.log({ txn, res })
            const event = res.events.filter((e) => e.event === "ProjectCreated")
@@ -36,7 +41,10 @@ export default function Mint() {
                projectName: args[1],
                symbol: args[2]
            })
-           navigate(`?contractAddress=${args[0]}`)
+        //    navigate(`?contractAddress=${args[0]}`)
+        navigate({
+            search: `?contractAddress=${args[0]}`,
+        })
     
 
         } catch (error) {
@@ -107,6 +115,7 @@ export default function Mint() {
         try {
             const txn = await playgroundContract.splitToken();
             console.log({ txn })
+            modal.showPendingTx(txn);
             
         } catch (error) {
             console.log({ error })
@@ -163,9 +172,11 @@ export default function Mint() {
             }
             initialise();
         }, [contract, provider, contractMetadata.address]);
+        
     if (!isPageLoaded) return  <div>Loading.... </div>
     return (
         <div className="container mx-auto p-4">
+            <ChangeAddress />
             <h1 className="text-4xl mt-16"> Welcome to Playground</h1>
             <p className="text-sm mt-2 opacity-50"> Start by giving your projet name, symbol, add all your shareholders, then mint your new project</p>
             <div className="mt-8 flex gap-6">

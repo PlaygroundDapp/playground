@@ -6,6 +6,7 @@ export const useInputChange = () => {
         amount: "",
         projectName:"",
         symbol: "",
+        contractAddress: "",
     });
 
     const handleInputChange = (e) => {

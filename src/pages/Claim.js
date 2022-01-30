@@ -4,6 +4,8 @@ import { useWeb3Context } from "../hooks/useWeb3Context";
 import { useProjectContract } from "../hooks/useContract";
 import SharesTable from "../components/misc/SharesTable";
 import ProjectDetails from "../components/misc/ProjectDetails";
+import ChangeAddress from "../components/misc/ChangeAddress";
+import { useModal } from "../components/modal/Modal";
 
 export default function Claim() {
   const { account, provider, contractMetadata, setContractMetadata } = useWeb3Context();
@@ -15,6 +17,7 @@ export default function Claim() {
   const [projectRevenue, setProjectRevenue] = useState();
   const [totalClaimed, setTotalClaimed] = useState();
   const [totalToClaim, setTotalToClaim] = useState();
+  const modal = useModal();
 
   useEffect(() => {
     setContractAddress(contractMetadata.address);
@@ -37,6 +40,7 @@ export default function Claim() {
         // const contract = getContract();
         const txn = await contract.claim(tokenId);
         console.log(txn);
+        modal.showPendingTx(txn);
         await txn.wait();
       } catch (error) {
         console.log(error);
@@ -113,7 +117,8 @@ export default function Claim() {
       <h1 className="text-4xl mt-16">Claim</h1>
 
       <div className="mt-8 mb-4">
-        <input type="text" placeholder="Contract address" className="input input-bordered w-full" value={contractAddress} onChange={handleAddressChange}/>
+      <ChangeAddress />
+        {/* <input type="text" placeholder="Contract address" className="input input-bordered w-full" value={contractAddress} onChange={handleAddressChange}/> */}
       </div>
 
       <ClaimEarnings address={contractAddress} />
