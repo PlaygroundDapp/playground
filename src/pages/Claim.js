@@ -28,17 +28,6 @@ export default function Claim() {
   const ClaimEarnings = (props) => {
     const contract = useProjectContract(props.address);
 
-    useEffect(() => {
-      if (!contract || !provider) {
-        return;
-      }
-      provider.once("block", () => {
-        contract.on("Claim", () => {
-          window.alert("Successfully Claimed");
-        });
-      });
-    }, [contract, provider]);
-
     if (!contract) {
       return null;
     }

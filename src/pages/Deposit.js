@@ -15,17 +15,6 @@ export default function Deposit() {
   const [projectSymbol, setProjectSymbol] = useState();
 
   useEffect(() => {
-    if (!contract || !provider) {
-      return;
-    }
-    provider.once("block", () => {
-      contract.on("Deposit", () => {
-        window.alert("Successfully Deposited");
-      });
-    });
-  }, [contract, provider]);
-
-  useEffect(() => {
     if (!contract) return;
 
     (async() => {
