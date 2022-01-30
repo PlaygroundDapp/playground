@@ -171,11 +171,6 @@ export default function Mint() {
               return;
             }
             initialise();
-            provider.once("block", () => {
-              contract.on("mint", () => {
-                  window.alert("Successfully Minted");
-              });
-            });
         }, [contract, provider, contractMetadata.address]);
         
     if (!isPageLoaded) return  <div>Loading.... </div>

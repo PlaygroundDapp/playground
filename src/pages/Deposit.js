@@ -17,17 +17,6 @@ export default function Deposit() {
   const modal = useModal();
 
   useEffect(() => {
-    if (!contract || !provider) {
-      return;
-    }
-    provider.once("block", () => {
-      contract.on("Deposit", () => {
-        window.alert("Successfully Deposited");
-      });
-    });
-  }, [contract, provider]);
-
-  useEffect(() => {
     if (!contract) return;
 
     (async() => {
@@ -91,6 +80,7 @@ export default function Deposit() {
           shares={shareholders}
           contractLoaded={contract !== null}
           shareTotal={shareTotal}
+          showSplitBtn={false}
         />
       </div>
       <div className="mt-8 mb-4">
