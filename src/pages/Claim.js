@@ -8,28 +8,31 @@ import ChangeAddress from "../components/misc/ChangeAddress";
 import { useModal } from "../components/modal/Modal";
 
 export default function Claim() {
-  const { account, provider, contractMetadata, setContractMetadata } = useWeb3Context();
-  const [tokens, setTokens] = useState([]);
+  const { account, contractMetadata } = useWeb3Context();
   const [contractAddress, setContractAddress] = useState(contractMetadata.address);
-  const [shareTotal, setShareTotal] = useState(0);
-  const [projectName, setProjectName] = useState();
-  const [projectSymbol, setProjectSymbol] = useState();
-  const [projectRevenue, setProjectRevenue] = useState();
-  const [totalClaimed, setTotalClaimed] = useState();
-  const [totalToClaim, setTotalToClaim] = useState();
   const modal = useModal();
 
   useEffect(() => {
     setContractAddress(contractMetadata.address);
   }, [contractMetadata.address]);
 
-  const handleAddressChange = (e) => {
-    setContractAddress(e.target.value);
-    setContractMetadata(e.target.value);
-  }
-
   const ClaimEarnings = (props) => {
+    const [shareTotal, setShareTotal] = useState(0);
+    const [projectName, setProjectName] = useState();
+    const [projectSymbol, setProjectSymbol] = useState();
+    const [projectRevenue, setProjectRevenue] = useState();
+    const [totalClaimed, setTotalClaimed] = useState();
+    const [totalToClaim, setTotalToClaim] = useState();
+    const [tokens, setTokens] = useState([]);
     const contract = useProjectContract(props.address);
+
+    useEffect(() => {
+      if (!contract) {
+        return;
+      }
+
+      getTokensForUser();
+    }, [])
 
     if (!contract) {
       return null;
@@ -117,8 +120,7 @@ export default function Claim() {
       <h1 className="text-4xl mt-16">Claim</h1>
 
       <div className="mt-8 mb-4">
-      <ChangeAddress />
-        {/* <input type="text" placeholder="Contract address" className="input input-bordered w-full" value={contractAddress} onChange={handleAddressChange}/> */}
+        <ChangeAddress />
       </div>
 
       <ClaimEarnings address={contractAddress} />
