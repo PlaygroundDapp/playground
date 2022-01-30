@@ -83,6 +83,7 @@ export default function Deposit() {
           shares={shareholders}
           contractLoaded={contract !== null}
           shareTotal={shareTotal}
+          showSplitBtn={false}
         />
       </div>
       <div className="mt-8 mb-4">
